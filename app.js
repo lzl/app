@@ -1,23 +1,32 @@
-if (Meteor.isClient) {
-  // counter starts at 0
-  Session.setDefault("counter", 0);
+Posts = new Mongo.Collection('posts');
 
-  Template.hello.helpers({
-    counter: function () {
-      return Session.get("counter");
+if (Meteor.isClient) {
+  Template.posts.helpers({
+    posts: function () {
+      return Posts.find();
     }
   });
 
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set("counter", Session.get("counter") + 1);
-    }
+  Template.posts.events({
   });
 }
 
 if (Meteor.isServer) {
+  // if the database is empty on server start, create some sample data.
   Meteor.startup(function () {
-    // code to run on server at startup
+    if (Posts.find().count() === 0) {
+      var data = [
+        {text: "Meteor Principles"},
+        {text: "Languages"},
+        {text: "Favorite Scientists"}
+      ];
+
+      var timestamp = (new Date()).getTime();
+      _.each(data, function(post) {
+        Posts.insert({text: post.text,
+                      createdAt: new Date(timestamp)});
+        timestamp += 1;
+      });
+    }
   });
 }
