@@ -1,4 +1,7 @@
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>LZL</title>
 </head>
 
@@ -43,7 +46,7 @@
             </ul>
           </li>
         </ul>
-        <form class="navbar-form navbar-left" role="search">
+        <form class="navbar-form navbar-left hidden-xs" role="search">
           <div class="form-group">
             <input type="text" class="form-control" placeholder="Search">
           </div>
@@ -54,7 +57,7 @@
 </template>
 
 <template name="posts">
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
       {{#each posts}}
         <div class="col-sm-6 col-md-4 col-lg-3 panel">
