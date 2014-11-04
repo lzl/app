@@ -10,9 +10,11 @@ Meteor.methods({
 })
 
 if (Meteor.isClient) {
+  Meteor.subscribe('allPosts');
+
   Template.posts.helpers({
     posts: function () {
-      return Posts.find();
+      return Posts.find({}, {sort: {createdAt: -1}});
     }
   });
 
@@ -49,5 +51,9 @@ if (Meteor.isServer) {
         timestamp += 1;
       });
     }
+  });
+
+  Meteor.publish('allPosts', function () {
+    return Posts.find({}, {sort: {createdAt: -1}});
   });
 }
