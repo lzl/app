@@ -1,5 +1,14 @@
 Posts = new Mongo.Collection('posts');
 
+Meteor.methods({
+  submit: function (val) {
+    return Posts.insert({
+      text: val,
+      createdAt: new Date()
+    });
+  },
+})
+
 if (Meteor.isClient) {
   Template.posts.helpers({
     posts: function () {
@@ -7,7 +16,17 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.posts.events({
+  Template.compose.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var val = tmpl.find('#text').value;
+      val = $.trim(val);
+      if (val) {
+        Meteor.call('submit', val);
+        tmpl.find('form').reset();
+        tmpl.find('#text').focus();
+      }
+    }
   });
 }
 
@@ -23,8 +42,10 @@ if (Meteor.isServer) {
 
       var timestamp = (new Date()).getTime();
       _.each(data, function(post) {
-        Posts.insert({text: post.text,
-                      createdAt: new Date(timestamp)});
+        Posts.insert({
+          text: post.text,
+          createdAt: new Date(timestamp)
+        });
         timestamp += 1;
       });
     }

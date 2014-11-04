@@ -5,6 +5,7 @@
 <body>
   {{> header}}
   {{> posts}}
+  {{> compose}}
 </body>
 
 <template name="header">
@@ -17,4 +18,11 @@
       <li>{{text}}</li>
     {{/each}}
   </ul>
+</template>
+
+<template name="compose">
+  <form>
+    <textarea type="text" id="text"></textarea>
+    <button type="submit">Submit</button>
+  </form>
 </template>
