@@ -10,6 +10,7 @@ Meteor.methods({
       title: val.title,
       text: val.text,
       topic: val.topic,
+      userId: Meteor.userId(),
       createdAt: new Date()
     });
   },
