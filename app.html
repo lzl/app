@@ -60,7 +60,7 @@
           <div class="panel-heading">
             <h3 class="panel-title">{{title}}</h3>
           </div>
-          <div class="panel-body">{{text}}</div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
         </div>
       {{/each}}
     </div>
@@ -74,7 +74,7 @@
         <div class="panel-heading">
           <h3 class="panel-title">{{title}}</h3>
         </div>
-        <div class="panel-body">{{text}}</div>
+        <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
       </div>
     </div>
   </div>
