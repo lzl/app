@@ -1,14 +1,106 @@
 <head>
-  <title>app</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>LZL</title>
 </head>
 
-<body>
-  <h1>Welcome to Meteor!</h1>
+<template name="appBody">
+  {{> navbar}}
+  {{> yield}}
+</template>
 
-  {{> hello}}
-</body>
+<template name="navbar">
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">LZL</a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div><!-- /.navbar-header -->
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="nav navbar-nav navbar-right">
+          {{> loginButtons}}
+        </ul>
+        <ul class="nav navbar-nav">
+          {{#if isAdmin}}
+          <li><a href="/compose">Compose</a></li>
+          {{/if}}
+          <!-- <li><a href="/">All posts</a></li> -->
+          <li><a href="/t/unschooling">Unschooling</a></li>
+          <li><a href="/t/meteor">Meteor</a></li>
+          <!-- <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">More <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="/t/meteor">Meteor</a></li>
+              <li class="divider"></li>
+              <li><a href="#">About</a></li>
+            </ul>
+          </li> -->
+        </ul>
+        <!-- <form class="navbar-form navbar-left hidden-xs" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+        </form> -->
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+</template>
+
+<template name="posts">
+  <div class="container-fluid">
+    <div class="row">
+      {{#each posts}}
+        <div class="col-sm-6 col-md-4 col-lg-3 panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{title}}</h3>
+          </div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="post">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2 panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{title}}</h3>
+        </div>
+        <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="compose">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <form role="form">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title">
+          </div>
+          <div class="form-group">
+            <label for="text">Text</label>
+            <textarea type="text" class="form-control" id="text" rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="text">Topic</label>
+            <input type="text" class="form-control" id="topic">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
