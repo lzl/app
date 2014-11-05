@@ -4,8 +4,19 @@ Router.configure({
   layoutTemplate: 'appBody'
 });
 
+isAdmin = function () {
+  var email = Meteor.user().emails[0].address;
+  return email === "lizunlong@gmail.com";
+};
+
 Meteor.methods({
   submit: function (val) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    if (!val.title || !val.text || !val.topic) {
+      throw new Meteor.Error(411, "Length required.")
+    }
     return Posts.insert({
       title: val.title,
       text: val.text,
@@ -17,11 +28,6 @@ Meteor.methods({
 })
 
 if (Meteor.isClient) {
-  var isAdmin = function () {
-    var email = Meteor.user().emails[0].address;
-    return email === "lizunlong@gmail.com";
-  };
-
   Router.route('/', function () {
     this.wait(Meteor.subscribe('allPosts'));
     this.render('posts');
@@ -71,11 +77,9 @@ if (Meteor.isClient) {
       var topic = tmpl.find('#topic').value;
       topic = $.trim(topic);
       var val = {title: title, text: text, topic: topic};
-      if (val && isAdmin()) {
-        Meteor.call('submit', val);
-        tmpl.find('form').reset();
-        tmpl.find('#title').focus();
-      }
+      Meteor.call('submit', val);
+      tmpl.find('form').reset();
+      tmpl.find('#title').focus();
     }
   });
 }
