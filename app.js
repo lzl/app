@@ -7,7 +7,9 @@ Router.configure({
 Meteor.methods({
   submit: function (val) {
     return Posts.insert({
-      text: val,
+      title: val.title,
+      text: val.text,
+      topic: val.topic,
       createdAt: new Date()
     });
   },
@@ -33,6 +35,15 @@ if (Meteor.isClient) {
     });
   });
 
+  Router.route('/compose');
+
+  Template.navbar.helpers({
+    isAdmin: function () {
+      var email = Meteor.user().emails[0].address;
+      return email === "lizunlong@gmail.com";
+    }
+  });
+
   Template.posts.helpers({
     posts: function () {
       return Posts.find({}, {sort: {createdAt: -1}});
@@ -42,12 +53,17 @@ if (Meteor.isClient) {
   Template.compose.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
-      var val = tmpl.find('#text').value;
-      val = $.trim(val);
+      var title = tmpl.find('#title').value;
+      title = $.trim(title);
+      var text = tmpl.find('#text').value;
+      text = $.trim(text);
+      var topic = tmpl.find('#topic').value;
+      topic = $.trim(topic);
+      var val = {title: title, text: text, topic: topic};
       if (val) {
         Meteor.call('submit', val);
         tmpl.find('form').reset();
-        tmpl.find('#text').focus();
+        tmpl.find('#title').focus();
       }
     }
   });

@@ -14,27 +14,23 @@
   <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
+        <a class="navbar-brand" href="/">LZL</a>
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu">
           <span class="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/">LZL</a>
       </div><!-- /.navbar-header -->
 
       <div class="collapse navbar-collapse" id="menu">
         <ul class="nav navbar-nav navbar-right">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sign In<span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="#">Meteor Developer Account</a></li>
-              <li><a href="#">Sina Weibo Account</a></li>
-              <li><a href="#">Wechat Account</a></li>
-            </ul>
-          </li>
+          {{> loginButtons}}
         </ul>
         <ul class="nav navbar-nav">
+          {{#if isAdmin}}
+          <li><a href="/compose">Compose</a></li>
+          {{/if}}
           <li class="active"><a href="/">All posts</a></li>
           <li><a href="/t/unschooling">Unschooling</a></li>
           <li class="dropdown">
@@ -85,8 +81,25 @@
 </template>
 
 <template name="compose">
-  <form>
-    <textarea type="text" id="text"></textarea>
-    <button type="submit">Submit</button>
-  </form>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <form role="form">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title">
+          </div>
+          <div class="form-group">
+            <label for="text">Text</label>
+            <textarea type="text" class="form-control" id="text" rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="text">Topic</label>
+            <input type="text" class="form-control" id="topic">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
