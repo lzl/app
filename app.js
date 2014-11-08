@@ -55,6 +55,8 @@ if (Meteor.isClient) {
     } else {
       this.render('compose');
     }
+  }, {
+    name: 'compose'
   });
 
   Template.navbar.helpers({

@@ -28,7 +28,7 @@
       </ul>
       <ul class="nav navbar-nav">
         {{#if isAdmin}}
-        <li><a href="/compose">Compose</a></li>
+        <li class="{{isActiveRoute regex='compose'}}"><a href="/compose">Compose</a></li>
         {{/if}}
         <li class="{{isActiveRoute regex='allPosts'}}"><a href="/">All posts</a></li>
         <li class="{{isActivePath regex='unschooling'}}"><a href="/t/unschooling">Unschooling</a></li>
