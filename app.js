@@ -31,6 +31,8 @@ if (Meteor.isClient) {
   Router.route('/', function () {
     this.wait(Meteor.subscribe('allPosts'));
     this.render('posts');
+  }, {
+    name: 'allPosts'
   });
 
   Router.route('/t/:topic', function () {
