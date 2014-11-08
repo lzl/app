@@ -9,4 +9,5 @@ iron:router
 ian:accounts-ui-bootstrap-3
 accounts-password
 markdown
+zimme:iron-router-active
 
