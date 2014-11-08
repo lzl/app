@@ -89,6 +89,10 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
+  FastRender.route('/', function () {
+    this.subscribe('allPosts');
+  });
+
   Meteor.publish('allPosts', function () {
     return Posts.find({}, {sort: {createdAt: -1}});
   });
