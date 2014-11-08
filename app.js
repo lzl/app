@@ -92,14 +92,20 @@ if (Meteor.isServer) {
   FastRender.route('/', function () {
     this.subscribe('allPosts');
   });
+  FastRender.route('/t/:topic', function (params) {
+    this.subscribe('topicPosts', params.topic);
+  });
+  FastRender.route('/p/:_id', function (params) {
+    this.subscribe('post', params._id);
+  });
 
   Meteor.publish('allPosts', function () {
     return Posts.find({}, {sort: {createdAt: -1}});
   });
   Meteor.publish('topicPosts', function (topic) {
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
-  })
+  });
   Meteor.publish('post', function (id) {
     return Posts.find({_id: id});
-  })
+  });
 }
