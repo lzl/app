@@ -1,1 +1,4 @@
 /* CSS declarations go here */
+.panel-title {
+  font-weight: bold;
+}
