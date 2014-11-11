@@ -66,6 +66,21 @@
   </div>
 </template>
 
+<template name="topicPosts">
+  <div class="container-fluid">
+    <div class="row">
+      {{#each posts topic}}
+        <div class="col-sm-6 col-md-4 col-lg-3 panel">
+          <div class="panel-heading">
+            <h1 class="panel-title">{{title}}</h1>
+          </div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
 <template name="post">
   <div class="container">
     <div class="row">

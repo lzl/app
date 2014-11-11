@@ -36,8 +36,10 @@ if (Meteor.isClient) {
   });
 
   Router.route('/t/:topic', function () {
-    this.wait(Meteor.subscribe('topicPosts', this.params.topic));
-    this.render('posts');
+    var topic = this.params.topic;
+    Session.set('topic', topic);
+    this.wait(Meteor.subscribe('topicPosts', topic));
+    this.render('topicPosts');
   });
 
   Router.route('/p/:_id', function () {
@@ -68,6 +70,15 @@ if (Meteor.isClient) {
   Template.posts.helpers({
     posts: function () {
       return Posts.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.topicPosts.helpers({
+    posts: function (topic) {
+      return Posts.find({topic: topic}, {sort: {createdAt: -1}});
+    },
+    topic: function () {
+      return Session.get('topic');
     }
   });
 
