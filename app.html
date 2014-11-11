@@ -51,13 +51,13 @@
   </nav>
 </template>
 
-<template name="posts">
+<template name="allPosts">
   <div class="container-fluid">
     <div class="row">
       {{#each posts}}
         <div class="col-sm-6 col-md-4 col-lg-3 panel">
           <div class="panel-heading">
-            <h1 class="panel-title">{{title}}</h1>
+            <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
           </div>
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
         </div>
@@ -66,7 +66,22 @@
   </div>
 </template>
 
-<template name="post">
+<template name="topicPosts">
+  <div class="container-fluid">
+    <div class="row">
+      {{#each posts topic}}
+        <div class="col-sm-6 col-md-4 col-lg-3 panel">
+          <div class="panel-heading">
+            <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+          </div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="singlePost">
   <div class="container">
     <div class="row">
       <div class="col-md-8 col-md-offset-2 panel">
