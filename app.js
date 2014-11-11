@@ -42,6 +42,8 @@ if (Meteor.isClient) {
     Session.set('topic', topic);
     this.wait(subs.subscribe('topicPosts', topic));
     this.render('topicPosts');
+  }, {
+    name:'topicPosts'
   });
 
   Router.route('/p/:_id', function () {
@@ -51,6 +53,8 @@ if (Meteor.isClient) {
         return Posts.findOne(this.params._id);
       }
     });
+  }, {
+    name: 'post'
   });
 
   Router.route('/compose', function () {

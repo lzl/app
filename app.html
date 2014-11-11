@@ -57,7 +57,7 @@
       {{#each posts}}
         <div class="col-sm-6 col-md-4 col-lg-3 panel">
           <div class="panel-heading">
-            <h1 class="panel-title">{{title}}</h1>
+            <a href="{{pathFor route='post'}}"><h1 class="panel-title">{{title}}</h1></a>
           </div>
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
         </div>
@@ -72,7 +72,7 @@
       {{#each posts topic}}
         <div class="col-sm-6 col-md-4 col-lg-3 panel">
           <div class="panel-heading">
-            <h1 class="panel-title">{{title}}</h1>
+            <a href="{{pathFor route='post'}}"><h1 class="panel-title">{{title}}</h1></a>
           </div>
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
         </div>
