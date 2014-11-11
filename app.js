@@ -28,8 +28,10 @@ Meteor.methods({
 })
 
 if (Meteor.isClient) {
+  var subs = new SubsManager();
+
   Router.route('/', function () {
-    this.wait(Meteor.subscribe('allPosts'));
+    this.wait(subs.subscribe('allPosts'));
     this.render('posts');
   }, {
     name: 'allPosts'
@@ -38,7 +40,7 @@ if (Meteor.isClient) {
   Router.route('/t/:topic', function () {
     var topic = this.params.topic;
     Session.set('topic', topic);
-    this.wait(Meteor.subscribe('topicPosts', topic));
+    this.wait(subs.subscribe('topicPosts', topic));
     this.render('topicPosts');
   });
 
