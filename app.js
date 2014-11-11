@@ -32,7 +32,7 @@ if (Meteor.isClient) {
 
   Router.route('/', function () {
     this.wait(subs.subscribe('allPosts'));
-    this.render('posts');
+    this.render('allPosts');
   }, {
     name: 'allPosts'
   });
@@ -47,14 +47,14 @@ if (Meteor.isClient) {
   });
 
   Router.route('/p/:_id', function () {
-    this.wait(Meteor.subscribe('post', this.params._id));
-    this.render('post', {
+    this.wait(subs.subscribe('singlePost', this.params._id));
+    this.render('singlePost', {
       data: function () {
         return Posts.findOne(this.params._id);
       }
     });
   }, {
-    name: 'post'
+    name: 'singlePost'
   });
 
   Router.route('/compose', function () {
@@ -73,7 +73,7 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.posts.helpers({
+  Template.allPosts.helpers({
     posts: function () {
       return Posts.find({}, {sort: {createdAt: -1}});
     }
@@ -113,7 +113,7 @@ if (Meteor.isServer) {
     this.subscribe('topicPosts', params.topic);
   });
   FastRender.route('/p/:_id', function (params) {
-    this.subscribe('post', params._id);
+    this.subscribe('singlePost', params._id);
   });
 
   Meteor.publish('allPosts', function () {
@@ -122,7 +122,7 @@ if (Meteor.isServer) {
   Meteor.publish('topicPosts', function (topic) {
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
   });
-  Meteor.publish('post', function (id) {
+  Meteor.publish('singlePost', function (id) {
     return Posts.find({_id: id});
   });
 }
