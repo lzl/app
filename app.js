@@ -87,6 +87,11 @@ if (Meteor.isClient) {
       return Session.get('topic');
     }
   });
+  Template.singlePost.helpers({
+    dateTime: function () {
+      return moment(this.createdAt).calendar();
+    }
+  });
 
   Template.compose.events({
     'submit form': function (e, tmpl) {

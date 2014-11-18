@@ -55,11 +55,13 @@
   <div class="container-fluid">
     <div class="row">
       {{#each posts}}
-        <div class="col-sm-6 col-md-4 col-lg-3 panel">
-          <div class="panel-heading">
-            <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+            </div>
+            <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
           </div>
-          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
         </div>
       {{/each}}
     </div>
@@ -69,12 +71,21 @@
 <template name="topicPosts">
   <div class="container-fluid">
     <div class="row">
-      {{#each posts topic}}
-        <div class="col-sm-6 col-md-4 col-lg-3 panel">
-          <div class="panel-heading">
-            <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+      <div class="col-sm-12 visible-xs-block">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            This page is all about <strong>{{topic}}</strong>. You can always read <a href="/" class="alert-link">all posts</a>.
           </div>
-          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        </div>
+      </div>
+      {{#each posts topic}}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+            </div>
+            <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+          </div>
         </div>
       {{/each}}
     </div>
@@ -84,11 +95,17 @@
 <template name="singlePost">
   <div class="container">
     <div class="row">
-      <div class="col-md-8 col-md-offset-2 panel">
-        <div class="panel-heading">
-          <h1 class="panel-title">{{title}}</h1>
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">{{title}}</h1>
+          </div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+          <div class="panel-footer">
+            <span>{{dateTime}}</span>
+            <span class="pull-right"><a href="{{pathFor route='topicPosts'}}">{{topic}}</a></span>
+          </div>
         </div>
-        <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
       </div>
     </div>
   </div>
