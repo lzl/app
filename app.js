@@ -1,4 +1,5 @@
 Posts = new Mongo.Collection('posts');
+AnonymousComments = new Mongo.Collection('anonymousComments');
 
 Router.configure({
   layoutTemplate: 'appBody'
@@ -25,7 +26,17 @@ Meteor.methods({
       createdAt: new Date()
     });
   },
-})
+  anonymousCommentSubmit: function (val) {
+    if (!val.text) {
+      throw new Meteor.Error(411, "Length required.")
+    }
+    return AnonymousComments.insert({
+      text: val.text,
+      postId: val.postId,
+      createdAt: new Date()
+    });
+  }
+});
 
 if (Meteor.isClient) {
   var subs = new SubsManager();
@@ -57,14 +68,15 @@ if (Meteor.isClient) {
     name: 'singlePost'
   });
 
-  Router.route('/compose', function () {
+  Router.route('/dashboard', function () {
     if (! isAdmin()) {
       this.redirect('/');
     } else {
-      this.render('compose');
+      this.wait(Meteor.subscribe('allAnonymousComments'));
+      this.render('dashboard');
     }
   }, {
-    name: 'compose'
+    name: 'dashboard'
   });
 
   Template.navbar.helpers({
@@ -87,13 +99,20 @@ if (Meteor.isClient) {
       return Session.get('topic');
     }
   });
+
   Template.singlePost.helpers({
     dateTime: function () {
       return moment(this.createdAt).calendar();
     }
   });
 
-  Template.compose.events({
+  Template.dashboard.helpers({
+    comments: function () {
+      return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.dashboard.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
@@ -108,6 +127,20 @@ if (Meteor.isClient) {
       tmpl.find('#title').focus();
     }
   });
+
+  Template.anonymousCommentSubmit.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var text = tmpl.find('[type=text]').value;
+      text = $.trim(text);
+      if (!text) return;
+      var postId = tmpl.data._id;
+      var val = {text: text, postId: postId};
+      Meteor.call('anonymousCommentSubmit', val);
+      tmpl.find('form').reset();
+      alert("Your question is submitted!");
+    }
+  })
 }
 
 if (Meteor.isServer) {
@@ -129,5 +162,8 @@ if (Meteor.isServer) {
   });
   Meteor.publish('singlePost', function (id) {
     return Posts.find({_id: id});
+  });
+  Meteor.publish('allAnonymousComments', function () {
+    return AnonymousComments.find({}, {sort: {createdAt: -1}});
   });
 }

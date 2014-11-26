@@ -28,7 +28,7 @@
       </ul>
       <ul class="nav navbar-nav">
         {{#if isAdmin}}
-        <li class="{{isActiveRoute regex='compose'}}"><a href="/compose">Compose</a></li>
+        <li class="{{isActiveRoute regex='dashboard'}}"><a href="/dashboard">Dashboard</a></li>
         {{/if}}
         <li class="{{isActiveRoute regex='allPosts'}}"><a href="/">All posts</a></li>
         <li class="{{isActivePath regex='unschooling'}}"><a href="/t/unschooling">Unschooling</a></li>
@@ -61,6 +61,7 @@
               <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
             </div>
             <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+            <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
           </div>
         </div>
       {{/each}}
@@ -85,6 +86,7 @@
               <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
             </div>
             <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+            <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
           </div>
         </div>
       {{/each}}
@@ -111,26 +113,65 @@
   </div>
 </template>
 
-<template name="compose">
+<template name="dashboard">
   <div class="container">
     <div class="row">
-      <div class="col-md-8 col-md-offset-2">
-        <form role="form">
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" class="form-control" id="title">
+      <div class="col-sm-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Comments</h2>
           </div>
-          <div class="form-group">
-            <label for="text">Text</label>
-            <textarea type="text" class="form-control" id="text" rows="5"></textarea>
+          <ul class="list-group">
+            {{#each comments}}
+              <li class="list-group-item">
+                {{text}}
+                <span class="pull-right">
+                  <a href="/p/{{postId}}">
+                    <span class="glyphicon glyphicon-link"></span>
+                  </a>
+                </span>
+              </li>
+            {{/each}}
+            <li class="list-group-item">EOF</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Compose</h2>
           </div>
-          <div class="form-group">
-            <label for="text">Topic</label>
-            <input type="text" class="form-control" id="topic">
+          <div class="panel-body">
+            <form role="form">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title">
+              </div>
+              <div class="form-group">
+                <label for="text">Text</label>
+                <textarea type="text" class="form-control" id="text" rows="5"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="text">Topic</label>
+                <input type="text" class="form-control" id="topic">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
           </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
+</template>
+
+<template name="anonymousCommentSubmit">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Ask anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
 </template>
