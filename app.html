@@ -123,8 +123,14 @@
           </div>
           <ul class="list-group">
             {{#each comments}}
-              <li class="list-group-item">{{text}}</li>
-              <li class="list-group-item">{{postId}}</li>
+              <li class="list-group-item">
+                {{text}}
+                <span class="pull-right">
+                  <a href="/p/{{postId}}">
+                    <span class="glyphicon glyphicon-link"></span>
+                  </a>
+                </span>
+              </li>
             {{/each}}
           </ul>
         </div>
