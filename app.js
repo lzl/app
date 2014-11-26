@@ -138,7 +138,7 @@ if (Meteor.isClient) {
       var val = {text: text, postId: postId};
       Meteor.call('anonymousCommentSubmit', val);
       tmpl.find('form').reset();
-      swal("Your question is submitted!", "Maybe I will answer it in a future post.", "success");
+      alert("Your question is submitted!");
     }
   })
 }
