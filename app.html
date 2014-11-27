@@ -53,17 +53,9 @@
 
 <template name="allPosts">
   <div class="container-fluid">
-    <div class="row">
+    <div id="masonry" class="row">
       {{#each posts}}
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
-            </div>
-            <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
-            <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
-          </div>
-        </div>
+        {{> card}}
       {{/each}}
     </div>
   </div>
@@ -79,17 +71,25 @@
           </div>
         </div>
       </div>
+    </div>
+    <div id="masonry" class="row">
       {{#each posts topic}}
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
-            </div>
-            <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
-            <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
-          </div>
-        </div>
+        {{> card}}
       {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="card">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+        </div>
+        <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
+      </div>
     </div>
   </div>
 </template>
