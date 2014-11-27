@@ -4,6 +4,10 @@
   color: #333;
 }
 
+img {
+  max-width: 100%;
+}
+
 code {
   -ms-word-break: break-all;
 

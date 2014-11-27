@@ -39,6 +39,16 @@ Meteor.methods({
 });
 
 if (Meteor.isClient) {
+  var masonry = function () {
+    var container = document.querySelector('#masonry');
+    // initialize Masonry
+    var msnry = new Masonry( container );
+    // layout Masonry again after all images have loaded
+    imagesLoaded( container, function() {
+      msnry.layout();
+    });
+  };
+
   var subs = new SubsManager();
 
   Router.route('/', function () {
@@ -78,6 +88,10 @@ if (Meteor.isClient) {
   }, {
     name: 'dashboard'
   });
+
+  Template.card.rendered = function () {
+    masonry();
+  };
 
   Template.navbar.helpers({
     isAdmin: function () {
