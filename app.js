@@ -63,6 +63,7 @@ if (Meteor.isClient) {
     Session.set('topic', topic);
     this.wait(subs.subscribe('topicPosts', topic));
     this.render('topicPosts');
+    scroll(0,0);
   }, {
     name:'topicPosts'
   });
@@ -74,6 +75,7 @@ if (Meteor.isClient) {
         return Posts.findOne(this.params._id);
       }
     });
+    scroll(0,0);
   }, {
     name: 'singlePost'
   });
