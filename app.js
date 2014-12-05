@@ -98,6 +98,12 @@ if (Meteor.isClient) {
     name: 'dashboard'
   });
 
+  Template.registerHelper("dateTime", function (when) {
+    if (when) {
+      return moment(when).calendar();
+    }
+  });
+
   Template.card.rendered = function () {
     masonry();
   };
@@ -140,12 +146,6 @@ if (Meteor.isClient) {
     },
     topic: function () {
       return Session.get('topic');
-    }
-  });
-
-  Template.singlePost.helpers({
-    dateTime: function () {
-      return moment(this.createdAt).calendar();
     }
   });
 
