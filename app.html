@@ -23,24 +23,13 @@
     </div><!-- /.navbar-header -->
 
     <div class="collapse navbar-collapse" id="menu">
-      <ul class="nav navbar-nav navbar-right">
-        {{> loginButtons}}
-      </ul>
       <ul class="nav navbar-nav">
-        {{#if isAdmin}}
+        {{#if isInRole 'admin'}}
         <li class="{{isActiveRoute regex='dashboard'}}"><a href="/dashboard">Dashboard</a></li>
         {{/if}}
         <li class="{{isActiveRoute regex='allPosts'}}"><a href="/">All posts</a></li>
         <li class="{{isActivePath regex='unschooling'}}"><a href="/t/unschooling">Unschooling</a></li>
         <li class="{{isActivePath regex='meteor'}}"><a href="/t/meteor">Meteor</a></li>
-        <!-- <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">More <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="/t/meteor">Meteor</a></li>
-            <li class="divider"></li>
-            <li><a href="#">About</a></li>
-          </ul>
-        </li> -->
       </ul>
       <!-- <form class="navbar-form navbar-left hidden-xs" role="search">
         <div class="form-group">
@@ -117,6 +106,15 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-6">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Account</h1>
+          </div>
+          <div class="panel-body">{{> loginButtons}}</div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h2 class="panel-title">Comments</h2>
@@ -174,4 +172,19 @@
       </span>
     </div>
   </form>
+</template>
+
+<template name="login">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Account</h1>
+          </div>
+          <div class="panel-body">{{> loginButtons}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>

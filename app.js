@@ -6,8 +6,9 @@ Router.configure({
 });
 
 isAdmin = function () {
-  var email = Meteor.user().emails[0].address;
-  return email === "lizunlong@gmail.com";
+  var user = Meteor.user();
+  var isAdmin = Roles.userIsInRole(user, 'admin');
+  return isAdmin;
 };
 
 Meteor.methods({
@@ -80,13 +81,19 @@ if (Meteor.isClient) {
     name: 'singlePost'
   });
 
-  Router.route('/dashboard', function () {
-    if (! isAdmin()) {
-      this.redirect('/');
+  Router.onBeforeAction(function () {
+    if (isAdmin()) {
+      this.next();
     } else {
-      this.wait(Meteor.subscribe('allAnonymousComments'));
-      this.render('dashboard');
+      this.render('login');
     }
+  }, {
+    only: ['dashboard']
+  });
+
+  Router.route('/dashboard', function () {
+    this.wait(Meteor.subscribe('allAnonymousComments'));
+    this.render('dashboard');
   }, {
     name: 'dashboard'
   });
@@ -94,12 +101,6 @@ if (Meteor.isClient) {
   Template.card.rendered = function () {
     masonry();
   };
-
-  Template.navbar.helpers({
-    isAdmin: function () {
-      return isAdmin();
-    }
-  });
 
   Template.allPosts.helpers({
     posts: function () {
@@ -181,5 +182,11 @@ if (Meteor.isServer) {
   });
   Meteor.publish('allAnonymousComments', function () {
     return AnonymousComments.find({}, {sort: {createdAt: -1}});
+  });
+
+  Meteor.users.deny({
+    update: function() {
+      return true;
+    }
   });
 }
