@@ -102,6 +102,32 @@ if (Meteor.isClient) {
     masonry();
   };
 
+  Template.card.helpers({
+    textTruncated: function () {
+      var size = 1000;
+      var textDefault = this.text;
+      if (textDefault.length > size) {
+        var textTruncated = $.trim(textDefault)
+                .substring(0, size)
+                .split(' ')
+                .slice(0, -1)
+                .join(' ');
+        return textTruncated + '...';
+      } else {
+        return textDefault;
+      }
+    },
+    isTruncated: function () {
+      var size = 1000;
+      var textDefault = this.text;
+      if (textDefault.length > size) {
+        return true;
+      } else {
+        false;
+      }
+    }
+  });
+
   Template.allPosts.helpers({
     posts: function () {
       return Posts.find({}, {sort: {createdAt: -1}});
