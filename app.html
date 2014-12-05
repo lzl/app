@@ -77,7 +77,9 @@
           <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
         </div>
         <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
-        <div class="panel-footer">{{> anonymousCommentSubmit}}</div>
+        <div class="panel-footer">
+          {{> anonymousCommentSubmit}}
+        </div>
       </div>
     </div>
   </div>
@@ -95,6 +97,9 @@
           <div class="panel-footer">
             <span>{{dateTime}}</span>
             <span class="pull-right"><a href="{{pathFor route='topicPosts'}}">{{topic}}</a></span>
+          </div>
+          <div class="panel-footer">
+            {{> anonymousCommentSubmit}}
           </div>
         </div>
       </div>
@@ -188,6 +193,15 @@
       </span>
     </div>
   </form>
+</template>
+
+<template name="readMore">
+  <a href="{{pathFor route='singlePost'}}">
+    <div>
+      <span>Read More</span>
+      <span class="glyphicon glyphicon-chevron-right pull-right" aria-hidden="true"></span>
+    </div>
+  </a>
 </template>
 
 <template name="login">
