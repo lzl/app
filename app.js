@@ -52,6 +52,16 @@ if (Meteor.isClient) {
 
   var subs = new SubsManager();
 
+  Router.onBeforeAction(function () {
+    if (isAdmin()) {
+      this.next();
+    } else {
+      this.render('login');
+    }
+  }, {
+    only: ['dashboard']
+  });
+
   Router.route('/', function () {
     this.wait(subs.subscribe('allPosts'));
     this.render('allPosts');
@@ -81,18 +91,8 @@ if (Meteor.isClient) {
     name: 'singlePost'
   });
 
-  Router.onBeforeAction(function () {
-    if (isAdmin()) {
-      this.next();
-    } else {
-      this.render('login');
-    }
-  }, {
-    only: ['dashboard']
-  });
-
   Router.route('/dashboard', function () {
-    this.wait(Meteor.subscribe('allAnonymousComments'));
+    this.wait(subs.subscribe('allAnonymousComments'));
     this.render('dashboard');
   }, {
     name: 'dashboard'
@@ -123,13 +123,13 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.dashboard.helpers({
+  Template.comments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
     }
   });
 
-  Template.dashboard.events({
+  Template.compose.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
