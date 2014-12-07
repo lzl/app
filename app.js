@@ -110,23 +110,13 @@ if (Meteor.isClient) {
 
   Template.card.helpers({
     textTruncated: function () {
-      var size = 1000;
-      var textDefault = this.text;
-      if (textDefault.length > size) {
-        var textTruncated = $.trim(textDefault)
-                .substring(0, size)
-                .split(' ')
-                .slice(0, -1)
-                .join(' ');
-        return textTruncated + '...';
-      } else {
-        return textDefault;
-      }
+      // via http://stackoverflow.com/a/27207320
+      return _.str.prune(this.text, 1000);
     },
     isTruncated: function () {
       var size = 1000;
-      var textDefault = this.text;
-      if (textDefault.length > size) {
+      var text = this.text;
+      if (text.length > size) {
         return true;
       } else {
         false;
