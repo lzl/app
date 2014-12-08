@@ -6,12 +6,13 @@ Router.configure({
 });
 
 isAdmin = function () {
-  var email = Meteor.user().emails[0].address;
-  return email === "lizunlong@gmail.com";
+  var user = Meteor.user();
+  var isAdmin = Roles.userIsInRole(user, 'admin');
+  return isAdmin;
 };
 
 Meteor.methods({
-  submit: function (val) {
+  postSubmit: function (val) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -35,6 +36,22 @@ Meteor.methods({
       postId: val.postId,
       createdAt: new Date()
     });
+  },
+  postEdit: function (id, val) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    if (!val.title || !val.text || !val.topic) {
+      throw new Meteor.Error(411, "Length required.")
+    }
+    Posts.update(id, {$set: val});
+  },
+  postRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    Posts.remove(id);
+    AnonymousComments.remove({postId: id});
   }
 });
 
@@ -50,6 +67,16 @@ if (Meteor.isClient) {
   };
 
   var subs = new SubsManager();
+
+  Router.onBeforeAction(function () {
+    if (isAdmin()) {
+      this.next();
+    } else {
+      this.render('login');
+    }
+  }, {
+    only: ['dashboard']
+  });
 
   Router.route('/', function () {
     this.wait(subs.subscribe('allPosts'));
@@ -70,7 +97,7 @@ if (Meteor.isClient) {
 
   Router.route('/p/:_id', function () {
     this.wait(subs.subscribe('singlePost', this.params._id));
-    this.render('singlePost', {
+    this.render('cardForSinglePost', {
       data: function () {
         return Posts.findOne(this.params._id);
       }
@@ -80,24 +107,47 @@ if (Meteor.isClient) {
     name: 'singlePost'
   });
 
+  Router.route('/p/:_id/edit', function () {
+    this.wait(subs.subscribe('singlePost', this.params._id));
+    this.render('postEdit', {
+      data: function () {
+        return Posts.findOne(this.params._id);
+      }
+    });
+  }, {
+    name: 'postEdit'
+  });
+
   Router.route('/dashboard', function () {
-    if (! isAdmin()) {
-      this.redirect('/');
-    } else {
-      this.wait(Meteor.subscribe('allAnonymousComments'));
-      this.render('dashboard');
-    }
+    this.wait(subs.subscribe('allAnonymousComments'));
+    this.render('dashboard');
   }, {
     name: 'dashboard'
   });
 
-  Template.card.rendered = function () {
+  Template.registerHelper("dateTime", function (when) {
+    if (when) {
+      return moment(when).calendar();
+    }
+  });
+
+  Template.cardForPosts.rendered = function () {
     masonry();
   };
 
-  Template.navbar.helpers({
-    isAdmin: function () {
-      return isAdmin();
+  Template.cardForPosts.helpers({
+    textTruncated: function () {
+      // via http://stackoverflow.com/a/27207320
+      return _.str.prune(this.text, 1000);
+    },
+    isTruncated: function () {
+      var size = 1000;
+      var text = this.text;
+      if (text.length > size) {
+        return true;
+      } else {
+        false;
+      }
     }
   });
 
@@ -116,19 +166,13 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.singlePost.helpers({
-    dateTime: function () {
-      return moment(this.createdAt).calendar();
-    }
-  });
-
-  Template.dashboard.helpers({
+  Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
     }
   });
 
-  Template.dashboard.events({
+  Template.postForm.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
@@ -138,13 +182,13 @@ if (Meteor.isClient) {
       var topic = tmpl.find('#topic').value;
       topic = $.trim(topic);
       var val = {title: title, text: text, topic: topic};
-      Meteor.call('submit', val);
+      Meteor.call('postSubmit', val);
       tmpl.find('form').reset();
       tmpl.find('#title').focus();
     }
   });
 
-  Template.anonymousCommentSubmit.events({
+  Template.anonymousCommentForm.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var text = tmpl.find('[type=text]').value;
@@ -154,9 +198,42 @@ if (Meteor.isClient) {
       var val = {text: text, postId: postId};
       Meteor.call('anonymousCommentSubmit', val);
       tmpl.find('form').reset();
-      alert("Your question is submitted!");
+      // alert("Your question is submitted!");
+      swal("Good job!", "Your question is submitted!", "success");
     }
-  })
+  });
+
+  Template.postEdit.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var title = tmpl.find('#title').value;
+      title = $.trim(title);
+      var text = tmpl.find('#text').value;
+      text = $.trim(text);
+      var topic = tmpl.find('#topic').value;
+      topic = $.trim(topic);
+      var id = this._id;
+      var val = {title: title, text: text, topic: topic};
+      Meteor.call('postEdit', id, val);
+      Router.go('singlePost', {_id: id});;
+    },
+    'click .delete': function(e) {
+      e.preventDefault();
+      var id = this._id;
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this post!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+      }, function () {
+        Meteor.call('postRemove', id);
+        Router.go('allPosts');
+      });
+    }
+  });
 }
 
 if (Meteor.isServer) {
@@ -181,5 +258,12 @@ if (Meteor.isServer) {
   });
   Meteor.publish('allAnonymousComments', function () {
     return AnonymousComments.find({}, {sort: {createdAt: -1}});
+  });
+
+  // via https://dweldon.silvrback.com/common-mistakes
+  Meteor.users.deny({
+    update: function() {
+      return true;
+    }
   });
 }
