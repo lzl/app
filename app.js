@@ -36,6 +36,21 @@ Meteor.methods({
       postId: val.postId,
       createdAt: new Date()
     });
+  },
+  postEdit: function (id, val) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    if (!val.title || !val.text || !val.topic) {
+      throw new Meteor.Error(411, "Length required.")
+    }
+    Posts.update(id, {$set: val});
+  },
+  postRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    Posts.remove(id);
   }
 });
 
@@ -89,6 +104,17 @@ if (Meteor.isClient) {
     scroll(0,0);
   }, {
     name: 'singlePost'
+  });
+
+  Router.route('/p/:_id/edit', function () {
+    this.wait(subs.subscribe('singlePost', this.params._id));
+    this.render('postEdit', {
+      data: function () {
+        return Posts.findOne(this.params._id);
+      }
+    });
+  }, {
+    name: 'postEdit'
   });
 
   Router.route('/dashboard', function () {
@@ -174,7 +200,39 @@ if (Meteor.isClient) {
       // alert("Your question is submitted!");
       swal("Good job!", "Your question is submitted!", "success");
     }
-  })
+  });
+
+  Template.postEdit.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var title = tmpl.find('#title').value;
+      title = $.trim(title);
+      var text = tmpl.find('#text').value;
+      text = $.trim(text);
+      var topic = tmpl.find('#topic').value;
+      topic = $.trim(topic);
+      var id = this._id;
+      var val = {title: title, text: text, topic: topic};
+      Meteor.call('postEdit', id, val);
+      Router.go('singlePost', {_id: id});;
+    },
+    'click .delete': function(e) {
+      e.preventDefault();
+      var id = this._id;
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this post!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+      }, function () {
+        Meteor.call('postRemove', id);
+        Router.go('allPosts');
+      });
+    }
+  });
 }
 
 if (Meteor.isServer) {

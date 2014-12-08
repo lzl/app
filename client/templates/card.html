@@ -25,7 +25,12 @@
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
           <div class="panel-footer">
             <span>{{dateTime createdAt}}</span>
-            <span class="pull-right"><a href="{{pathFor route='topicPosts'}}">{{topic}}</a></span>
+            <span class="pull-right">
+              <a href="{{pathFor route='topicPosts'}}">{{topic}}</a>
+              {{#if isInRole 'admin'}}
+               | <a href="{{pathFor route='postEdit'}}">edit</a>
+              {{/if}}
+            </span>
           </div>
           <div class="panel-footer">
             {{> anonymousCommentForm}}
