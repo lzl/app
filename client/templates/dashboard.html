@@ -54,15 +54,18 @@
   </div>
 </template>
 
-<template name='anonymousComment'>
+<template name="anonymousComment">
   <li class="list-group-item">
+    {{> anonymousCommentButtons}}
     {{text}}
-    <span class="pull-right">
-      <a href="/p/{{postId}}">
-        <span class="glyphicon glyphicon-link"></span>
-      </a>
-    </span>
   </li>
+</template>
+
+<template name="anonymousCommentButtons">
+  <div class="btn-group btn-group-xs pull-right" role="group">
+    <button type="button" class="btn btn-default link">link</button>
+    <button type="button" class="btn btn-default delete">delete</button>
+  </div>
 </template>
 
 <template name="postForm">

@@ -52,6 +52,12 @@ Meteor.methods({
     }
     Posts.remove(id);
     AnonymousComments.remove({postId: id});
+  },
+  anonymousCommentRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    AnonymousComments.remove(id);
   }
 });
 
@@ -169,6 +175,29 @@ if (Meteor.isClient) {
   Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.anonymousCommentButtons.events({
+    'click .link': function (e) {
+      e.preventDefault();
+      var id = this.postId;
+      Router.go('singlePost', {_id: id});
+    },
+    'click .delete': function (e) {
+      e.preventDefault();
+      var id = this._id;
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this comment!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+      }, function () {
+        Meteor.call('anonymousCommentRemove', id);
+      });
     }
   });
 
