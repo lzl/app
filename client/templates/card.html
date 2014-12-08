@@ -1,0 +1,37 @@
+<template name="cardForPosts">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a href="{{pathFor route='singlePost'}}"><h1 class="panel-title">{{title}}</h1></a>
+        </div>
+        <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+        <div class="panel-footer">
+          {{> anonymousCommentForm}}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="cardForSinglePost">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">{{title}}</h1>
+          </div>
+          <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
+          <div class="panel-footer">
+            <span>{{dateTime createdAt}}</span>
+            <span class="pull-right"><a href="{{pathFor route='topicPosts'}}">{{topic}}</a></span>
+          </div>
+          <div class="panel-footer">
+            {{> anonymousCommentForm}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

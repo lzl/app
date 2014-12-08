@@ -1,0 +1,95 @@
+<template name="dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      {{> account}}
+      {{> anonymousComments}}
+      {{> postForm}}
+    </div>
+  </div>
+</template>
+
+<template name="login">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Account</h1>
+          </div>
+          <div class="panel-body">{{> loginButtons}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="account">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class=" panel panel-default">
+        <div class="panel-heading">
+          <h1 class="panel-title">Account</h1>
+        </div>
+        <div class="panel-body">{{> loginButtons}}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="anonymousComments">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2 class="panel-title">Comments</h2>
+        </div>
+        <ul class="list-group">
+          {{#each comments}}
+            {{> anonymousComment}}
+          {{/each}}
+          <li class="list-group-item">EOF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name='anonymousComment'>
+  <li class="list-group-item">
+    {{text}}
+    <span class="pull-right">
+      <a href="/p/{{postId}}">
+        <span class="glyphicon glyphicon-link"></span>
+      </a>
+    </span>
+  </li>
+</template>
+
+<template name="postForm">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2 class="panel-title">Compose</h2>
+        </div>
+        <div class="panel-body">
+          <form role="form">
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" class="form-control" id="title">
+            </div>
+            <div class="form-group">
+              <label for="text">Text</label>
+              <textarea type="text" class="form-control" id="text" rows="5"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="text">Topic</label>
+              <input type="text" class="form-control" id="topic">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

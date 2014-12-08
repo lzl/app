@@ -12,7 +12,7 @@ isAdmin = function () {
 };
 
 Meteor.methods({
-  submit: function (val) {
+  postSubmit: function (val) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -81,7 +81,7 @@ if (Meteor.isClient) {
 
   Router.route('/p/:_id', function () {
     this.wait(subs.subscribe('singlePost', this.params._id));
-    this.render('singlePost', {
+    this.render('cardForSinglePost', {
       data: function () {
         return Posts.findOne(this.params._id);
       }
@@ -104,11 +104,11 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.card.rendered = function () {
+  Template.cardForPosts.rendered = function () {
     masonry();
   };
 
-  Template.card.helpers({
+  Template.cardForPosts.helpers({
     textTruncated: function () {
       // via http://stackoverflow.com/a/27207320
       return _.str.prune(this.text, 1000);
@@ -139,13 +139,13 @@ if (Meteor.isClient) {
     }
   });
 
-  Template.comments.helpers({
+  Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
     }
   });
 
-  Template.compose.events({
+  Template.postForm.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
@@ -155,13 +155,13 @@ if (Meteor.isClient) {
       var topic = tmpl.find('#topic').value;
       topic = $.trim(topic);
       var val = {title: title, text: text, topic: topic};
-      Meteor.call('submit', val);
+      Meteor.call('postSubmit', val);
       tmpl.find('form').reset();
       tmpl.find('#title').focus();
     }
   });
 
-  Template.anonymousCommentSubmit.events({
+  Template.anonymousCommentForm.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var text = tmpl.find('[type=text]').value;
@@ -201,6 +201,7 @@ if (Meteor.isServer) {
     return AnonymousComments.find({}, {sort: {createdAt: -1}});
   });
 
+  // via https://dweldon.silvrback.com/common-mistakes
   Meteor.users.deny({
     update: function() {
       return true;
