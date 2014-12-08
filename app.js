@@ -51,6 +51,7 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     Posts.remove(id);
+    AnonymousComments.remove({postId: id});
   }
 });
 
