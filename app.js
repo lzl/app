@@ -141,6 +141,10 @@ if (Meteor.isClient) {
     masonry();
   };
 
+  Template.postEdit.rendered = function () {
+    $('textarea').autosize();
+  }
+
   Template.cardForPosts.helpers({
     textTruncated: function () {
       // via http://stackoverflow.com/a/27207320
@@ -202,6 +206,9 @@ if (Meteor.isClient) {
   });
 
   Template.postForm.events({
+    'keyup textarea': function () {
+      $('textarea').autosize();
+    },
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
@@ -233,6 +240,9 @@ if (Meteor.isClient) {
   });
 
   Template.postEdit.events({
+    'keyup textarea': function () {
+      $('textarea').autosize();
+    },
     'submit form': function (e, tmpl) {
       e.preventDefault();
       var title = tmpl.find('#title').value;
