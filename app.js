@@ -232,10 +232,23 @@ if (Meteor.isClient) {
       if (!text) return;
       var postId = tmpl.data._id;
       var val = {text: text, postId: postId};
-      Meteor.call('anonymousCommentSubmit', val);
-      tmpl.find('form').reset();
-      // alert("Your question is submitted!");
-      swal("Good job!", "Your question is submitted!", "success");
+      swal({
+        title: "Preview",
+        text: text,
+        type: "info",
+        showCancelButton: true,
+        confirmButtonText: "Yes, submit it!",
+        cancelButtonText: "No, cancel plx!",
+        closeOnConfirm: false,
+        }, function (isConfirm) {
+          if (isConfirm) {
+            Meteor.call('anonymousCommentSubmit', val);
+            swal("Good job!", "Your question is submitted!", "success");
+            tmpl.find('form').reset();
+          } else {
+            tmpl.find('form').focus();
+          }
+        });
     }
   });
 
