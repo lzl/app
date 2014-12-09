@@ -4,6 +4,10 @@
   color: #333;
 }
 
+.no-margin p {
+  margin: 0;
+}
+
 img {
   max-width: 100%;
 }

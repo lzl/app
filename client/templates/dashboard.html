@@ -1,7 +1,6 @@
 <template name="dashboard">
   <div class="container-fluid">
     <div class="row">
-      {{> account}}
       {{> anonymousComments}}
       {{> postForm}}
     </div>
@@ -18,19 +17,6 @@
           </div>
           <div class="panel-body">{{> loginButtons}}</div>
         </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<template name="account">
-  <div class="col-sm-6 col-md-4 col-lg-3">
-    <div class="item">
-      <div class=" panel panel-default">
-        <div class="panel-heading">
-          <h1 class="panel-title">Account</h1>
-        </div>
-        <div class="panel-body">{{> loginButtons}}</div>
       </div>
     </div>
   </div>
@@ -54,15 +40,18 @@
   </div>
 </template>
 
-<template name='anonymousComment'>
+<template name="anonymousComment">
   <li class="list-group-item">
+    {{> anonymousCommentButtons}}
     {{text}}
-    <span class="pull-right">
-      <a href="/p/{{postId}}">
-        <span class="glyphicon glyphicon-link"></span>
-      </a>
-    </span>
   </li>
+</template>
+
+<template name="anonymousCommentButtons">
+  <div class="btn-group btn-group-xs pull-right" role="group">
+    <button type="button" class="btn btn-default link">link</button>
+    <button type="button" class="btn btn-default delete">delete</button>
+  </div>
 </template>
 
 <template name="postForm">
