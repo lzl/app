@@ -11,9 +11,14 @@
     </div>
 
     <div class="collapse navbar-collapse" id="menu">
+      {{#if isInRole 'admin'}}
+        <ul class="nav navbar-nav navbar-right">
+          {{> loginButtons}}
+        </ul>
+      {{/if}}
       <ul class="nav navbar-nav">
         {{#if isInRole 'admin'}}
-        <li class="{{isActiveRoute regex='dashboard'}}"><a href="/dashboard">Dashboard</a></li>
+          <li class="{{isActiveRoute regex='dashboard'}}"><a href="/dashboard">Dashboard</a></li>
         {{/if}}
         <li class="{{isActiveRoute regex='allPosts'}}"><a href="/">All posts</a></li>
         <li class="{{isActivePath regex='unschooling'}}"><a href="/t/unschooling">Unschooling</a></li>
