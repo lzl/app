@@ -1,3 +1,63 @@
+<template name="cardForLogs">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          {{#if isInRole 'admin'}}
+            {{> logSubmitForm}}
+          {{else}}
+            <h1 class="panel-title">What I Learned Today</h1>
+          {{/if}}
+        </div>
+        <ul class="list-group">
+          {{#each logs}}
+            {{> cardForSingleLog}}
+          {{/each}}
+          <li class="list-group-item">EOF</li>
+        </ul>
+        {{#if isInRole 'admin'}}
+        {{else}}
+        <div class="panel-footer">
+          <form role="form">
+            <div class="input-group">
+              <input type="text" class="form-control" disabled>
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="submit" disabled="disabled">Preview</button>
+              </span>
+            </div>
+          </form>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="logSubmitForm">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Log what you learned">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
+</template>
+
+<template name="cardForSingleLog">
+  <li class="list-group-item no-margin">
+    {{#if isInRole 'admin'}}
+      {{> cardForSingleLogButtons}}
+    {{/if}}
+    <span class="pull-right"><code>{{timestamp createdAt}}</code></span>
+    {{#markdown}}{{text}}{{/markdown}}
+  </li>
+</template>
+
+<template name="cardForSingleLogButtons">
+  <button type="button" class="btn btn-default btn-xs pull-right delete">delete</button>
+</template>
+
 <template name="cardForPosts">
   <div class="col-sm-6 col-md-4 col-lg-3">
     <div class="item">
