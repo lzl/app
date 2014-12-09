@@ -15,6 +15,19 @@
           {{/each}}
           <li class="list-group-item">EOF</li>
         </ul>
+        {{#if isInRole 'admin'}}
+        {{else}}
+        <div class="panel-footer">
+          <form role="form">
+            <div class="input-group">
+              <input type="text" class="form-control" disabled>
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="submit" disabled="disabled">Preview</button>
+              </span>
+            </div>
+          </form>
+        </div>
+        {{/if}}
       </div>
     </div>
   </div>
