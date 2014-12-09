@@ -1,6 +1,7 @@
 <template name="allPosts">
   <div class="container-fluid">
     <div id="masonry" class="row">
+      {{> cardForLogs}}
       {{#each posts}}
         {{> cardForPosts}}
       {{/each}}

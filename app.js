@@ -1,4 +1,5 @@
 Posts = new Mongo.Collection('posts');
+Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
 
 Router.configure({
@@ -12,6 +13,16 @@ isAdmin = function () {
 };
 
 Meteor.methods({
+  logSubmit: function (val) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    return Logs.insert({
+      text: val,
+      userId: Meteor.userId(),
+      createdAt: new Date()
+    });
+  },
   postSubmit: function (val) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
@@ -58,6 +69,12 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     AnonymousComments.remove(id);
+  },
+  logRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    Logs.remove(id);
   }
 });
 
@@ -85,7 +102,7 @@ if (Meteor.isClient) {
   });
 
   Router.route('/', function () {
-    this.wait(subs.subscribe('allPosts'));
+    this.wait([subs.subscribe('allPosts'), subs.subscribe('todayLogs')]);
     this.render('allPosts');
   }, {
     name: 'allPosts'
@@ -137,6 +154,16 @@ if (Meteor.isClient) {
     }
   });
 
+  Template.registerHelper("timestamp", function (when) {
+    if (when) {
+      return moment(when).format('HH:mm');
+    }
+  });
+
+  Template.cardForSingleLog.rendered = function () {
+    masonry();
+  };
+
   Template.cardForPosts.rendered = function () {
     masonry();
   };
@@ -144,6 +171,12 @@ if (Meteor.isClient) {
   Template.postEdit.rendered = function () {
     $('textarea').autosize();
   }
+
+  Template.cardForLogs.helpers({
+    logs: function () {
+      return Logs.find({}, {sort: {createdAt: -1}});
+    }
+  });
 
   Template.cardForPosts.helpers({
     textTruncated: function () {
@@ -179,6 +212,36 @@ if (Meteor.isClient) {
   Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.logSubmitForm.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var text = tmpl.find('[type=text]').value;
+      text = $.trim(text);
+      if (!text) return;
+      Meteor.call('logSubmit', text);
+      tmpl.find('form').reset();
+      tmpl.find('form').focus();
+    }
+  });
+
+  Template.cardForSingleLogButtons.events({
+    'click .delete': function (e) {
+      e.preventDefault();
+      var id = this._id;
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this log!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+      }, function () {
+        Meteor.call('logRemove', id);
+      });
     }
   });
 
@@ -291,6 +354,7 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
   FastRender.route('/', function () {
     this.subscribe('allPosts');
+    this.subscribe('todayLogs');
   });
   FastRender.route('/t/:topic', function (params) {
     this.subscribe('topicPosts', params.topic);
@@ -299,6 +363,11 @@ if (Meteor.isServer) {
     this.subscribe('singlePost', params._id);
   });
 
+  Meteor.publish('todayLogs', function () {
+    var date = new Date();
+    date.setDate(date.getDate() - 1);
+    return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+  });
   Meteor.publish('allPosts', function () {
     return Posts.find({}, {sort: {createdAt: -1}});
   });
