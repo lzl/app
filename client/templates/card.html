@@ -18,14 +18,7 @@
         {{#if isInRole 'admin'}}
         {{else}}
         <div class="panel-footer">
-          <form role="form">
-            <div class="input-group">
-              <input type="text" class="form-control" disabled>
-              <span class="input-group-btn">
-                <button class="btn btn-default" type="submit" disabled="disabled">Preview</button>
-              </span>
-            </div>
-          </form>
+          {{> anonymousLogForm}}
         </div>
         {{/if}}
       </div>
@@ -36,7 +29,7 @@
 <template name="logSubmitForm">
   <form role="form">
     <div class="input-group">
-      <input type="text" class="form-control" placeholder="Log what you learned">
+      <input type="text" class="form-control" placeholder="What I learned today">
       <span class="input-group-btn">
         <button class="btn btn-default" type="submit">Submit</button>
       </span>
