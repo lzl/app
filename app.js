@@ -416,6 +416,48 @@ if (Meteor.isClient) {
       });
     }
   });
+
+  Tracker.autorun(function () {
+    var query = Logs.find();
+    var handle = query.observeChanges({
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = Posts.find();
+    var handle = query.observeChanges({
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = AnonymousLogs.find();
+    var handle = query.observeChanges({
+      added: function () {
+        masonry();
+      },
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = AnonymousComments.find();
+    var handle = query.observeChanges({
+      added: function () {
+        masonry();
+      },
+      removed: function () {
+        masonry();
+      }
+    });
+  });
 }
 
 if (Meteor.isServer) {
