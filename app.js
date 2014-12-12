@@ -1,6 +1,7 @@
 Posts = new Mongo.Collection('posts');
 Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
+AnonymousLogs = new Mongo.Collection('anonymousLogs');
 
 Router.configure({
   layoutTemplate: 'appBody'
@@ -20,6 +21,12 @@ Meteor.methods({
     return Logs.insert({
       text: val,
       userId: Meteor.userId(),
+      createdAt: new Date()
+    });
+  },
+  anonymousLogSubmit: function (val) {
+    return AnonymousLogs.insert({
+      text: val,
       createdAt: new Date()
     });
   },
@@ -48,6 +55,18 @@ Meteor.methods({
       createdAt: new Date()
     });
   },
+  logRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    Logs.remove(id);
+  },
+  anonymousLogRemove: function (id) {
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    AnonymousLogs.remove(id);
+  },
   postEdit: function (id, val) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
@@ -69,12 +88,6 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     AnonymousComments.remove(id);
-  },
-  logRemove: function (id) {
-    if (! isAdmin()) {
-      throw new Meteor.Error(401, "The request requires user authentication.");
-    }
-    Logs.remove(id);
   }
 });
 
@@ -142,7 +155,11 @@ if (Meteor.isClient) {
   });
 
   Router.route('/dashboard', function () {
-    this.wait(subs.subscribe('allAnonymousComments'));
+    this.wait([
+      subs.subscribe('todayLogs'),
+      subs.subscribe('allAnonymousLogs'),
+      subs.subscribe('allAnonymousComments')
+    ]);
     this.render('dashboard');
   }, {
     name: 'dashboard'
@@ -209,6 +226,12 @@ if (Meteor.isClient) {
     }
   });
 
+  Template.anonymousLogs.helpers({
+    logs: function () {
+      return AnonymousLogs.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
   Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
@@ -241,6 +264,24 @@ if (Meteor.isClient) {
         closeOnConfirm: true
       }, function () {
         Meteor.call('logRemove', id);
+      });
+    }
+  });
+
+  Template.anonymousLogButtons.events({
+    'click .delete': function (e) {
+      e.preventDefault();
+      var id = this._id;
+      swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this log!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+      }, function () {
+        Meteor.call('anonymousLogRemove', id);
       });
     }
   });
@@ -287,6 +328,32 @@ if (Meteor.isClient) {
     }
   });
 
+  Template.anonymousLogForm.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var text = tmpl.find('[type=text]').value;
+      text = $.trim(text);
+      if (!text) return;
+      swal({
+        title: "Preview",
+        text: text,
+        type: "info",
+        showCancelButton: true,
+        confirmButtonText: "Yes, submit it!",
+        cancelButtonText: "No, cancel plx!",
+        closeOnConfirm: false,
+        }, function (isConfirm) {
+          if (isConfirm) {
+            Meteor.call('anonymousLogSubmit', text);
+            swal("Thank you!", "You learned a lot today!", "success");
+            tmpl.find('form').reset();
+          } else {
+            tmpl.find('form').focus();
+          }
+      });
+    }
+  });
+
   Template.anonymousCommentForm.events({
     'submit form': function (e, tmpl) {
       e.preventDefault();
@@ -311,7 +378,7 @@ if (Meteor.isClient) {
           } else {
             tmpl.find('form').focus();
           }
-        });
+      });
     }
   });
 
@@ -349,6 +416,48 @@ if (Meteor.isClient) {
       });
     }
   });
+
+  Tracker.autorun(function () {
+    var query = Logs.find();
+    var handle = query.observeChanges({
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = Posts.find();
+    var handle = query.observeChanges({
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = AnonymousLogs.find();
+    var handle = query.observeChanges({
+      added: function () {
+        masonry();
+      },
+      removed: function () {
+        masonry();
+      }
+    });
+  });
+
+  Tracker.autorun(function () {
+    var query = AnonymousComments.find();
+    var handle = query.observeChanges({
+      added: function () {
+        masonry();
+      },
+      removed: function () {
+        masonry();
+      }
+    });
+  });
 }
 
 if (Meteor.isServer) {
@@ -367,6 +476,9 @@ if (Meteor.isServer) {
     var date = new Date();
     date.setDate(date.getDate() - 1);
     return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+  });
+  Meteor.publish('allAnonymousLogs', function () {
+    return AnonymousLogs.find({}, {sort: {createdAt: -1}});
   });
   Meteor.publish('allPosts', function () {
     return Posts.find({}, {sort: {createdAt: -1}});

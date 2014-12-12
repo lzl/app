@@ -1,6 +1,8 @@
 <template name="dashboard">
   <div class="container-fluid">
-    <div class="row">
+    <div id="masonry" class="row">
+      {{> cardForLogs}}
+      {{> anonymousLogs}}
       {{> anonymousComments}}
       {{> postForm}}
     </div>
@@ -22,6 +24,36 @@
   </div>
 </template>
 
+<template name="anonymousLogs">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2 class="panel-title">What They Learned</h2>
+        </div>
+        <ul class="list-group">
+          {{#each logs}}
+            {{> anonymousLog}}
+          {{/each}}
+          <li class="list-group-item">EOF</li>
+        </ul>
+        {{> diabledFooter}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="anonymousLog">
+  <li class="list-group-item">
+    {{> anonymousLogButtons}}
+    {{text}}
+  </li>
+</template>
+
+<template name="anonymousLogButtons">
+  <button type="button" class="btn btn-default btn-xs pull-right delete">delete</button>
+</template>
+
 <template name="anonymousComments">
   <div class="col-sm-6 col-md-4 col-lg-3">
     <div class="item">
@@ -35,6 +67,7 @@
           {{/each}}
           <li class="list-group-item">EOF</li>
         </ul>
+        {{> diabledFooter}}
       </div>
     </div>
   </div>
@@ -78,7 +111,21 @@
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
+        {{> diabledFooter}}
       </div>
     </div>
+  </div>
+</template>
+
+<template name="diabledFooter">
+  <div class="panel-footer">
+    <form role="form">
+      <div class="input-group">
+        <input type="text" class="form-control" disabled>
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="submit" disabled="disabled">:D</button>
+        </span>
+      </div>
+    </form>
   </div>
 </template>
