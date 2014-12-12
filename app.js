@@ -156,6 +156,7 @@ if (Meteor.isClient) {
 
   Router.route('/dashboard', function () {
     this.wait([
+      subs.subscribe('todayLogs'),
       subs.subscribe('allAnonymousLogs'),
       subs.subscribe('allAnonymousComments')
     ]);
