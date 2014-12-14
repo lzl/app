@@ -37,13 +37,15 @@ Meteor.methods({
     if (!val.title || !val.text || !val.topic) {
       throw new Meteor.Error(411, "Length required.")
     }
-    return Posts.insert({
+    var postId = Posts.insert({
       title: val.title,
       text: val.text,
       topic: val.topic,
       userId: Meteor.userId(),
       createdAt: new Date()
     });
+    var autoLog = 'New post: [' + val.title + '](/p/' + postId + ')';
+    return Meteor.call('logSubmit', autoLog);
   },
   anonymousCommentSubmit: function (val) {
     if (!val.text) {
