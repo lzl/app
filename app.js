@@ -181,7 +181,31 @@ if (Meteor.isClient) {
     masonry();
   };
 
+  Template.cardForSingleLog.destroyed = function () {
+    masonry();
+  };
+
   Template.cardForPosts.rendered = function () {
+    masonry();
+  };
+
+  Template.cardForPosts.destroyed = function () {
+    masonry();
+  };
+
+  Template.anonymousLog.rendered = function () {
+    masonry();
+  };
+
+  Template.anonymousLog.destroyed = function () {
+    masonry();
+  };
+
+  Template.anonymousComment.rendered = function () {
+    masonry();
+  };
+
+  Template.anonymousComment.destroyed = function () {
     masonry();
   };
 
@@ -415,48 +439,6 @@ if (Meteor.isClient) {
         Router.go('allPosts');
       });
     }
-  });
-
-  Tracker.autorun(function () {
-    var query = Logs.find();
-    var handle = query.observeChanges({
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = Posts.find();
-    var handle = query.observeChanges({
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = AnonymousLogs.find();
-    var handle = query.observeChanges({
-      added: function () {
-        masonry();
-      },
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = AnonymousComments.find();
-    var handle = query.observeChanges({
-      added: function () {
-        masonry();
-      },
-      removed: function () {
-        masonry();
-      }
-    });
   });
 }
 
