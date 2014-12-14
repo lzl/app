@@ -61,13 +61,13 @@ Meteor.methods({
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    Logs.remove(id);
+    return Logs.remove(id);
   },
   anonymousLogRemove: function (id) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    AnonymousLogs.remove(id);
+    return AnonymousLogs.remove(id);
   },
   postEdit: function (id, val) {
     if (! isAdmin()) {
@@ -77,19 +77,21 @@ Meteor.methods({
       throw new Meteor.Error(411, "Length required.")
     }
     Posts.update(id, {$set: val});
+    var autoLog = 'Updated post: [' + val.title + '](/p/' + id + ')';
+    return Meteor.call('logSubmit', autoLog);
   },
   postRemove: function (id) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     Posts.remove(id);
-    AnonymousComments.remove({postId: id});
+    return AnonymousComments.remove({postId: id});
   },
   anonymousCommentRemove: function (id) {
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    AnonymousComments.remove(id);
+    return AnonymousComments.remove(id);
   }
 });
 
