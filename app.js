@@ -44,7 +44,7 @@ Meteor.methods({
       userId: Meteor.userId(),
       createdAt: new Date()
     });
-    var autoLog = 'New post: [' + val.title + '](/p/' + postId + ')';
+    var autoLog = 'New: [' + val.title + '](/p/' + postId + ')';
     return Meteor.call('logSubmit', autoLog);
   },
   anonymousCommentSubmit: function (val) {
@@ -77,7 +77,7 @@ Meteor.methods({
       throw new Meteor.Error(411, "Length required.")
     }
     Posts.update(id, {$set: val});
-    var autoLog = 'Updated post: [' + val.title + '](/p/' + id + ')';
+    var autoLog = 'Updated: [' + val.title + '](/p/' + id + ')';
     return Meteor.call('logSubmit', autoLog);
   },
   postRemove: function (id) {
