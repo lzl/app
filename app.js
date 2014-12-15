@@ -74,7 +74,7 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     if (!val.title || !val.text || !val.topic) {
-      throw new Meteor.Error(411, "Length required.")
+      throw new Meteor.Error(411, "Length required.");
     }
     Posts.update(id, {$set: val});
     var autoLog = 'Updated: [' + val.title + '](/p/' + id + ')';
@@ -115,7 +115,7 @@ if (Meteor.isClient) {
       this.render('login');
     }
   }, {
-    only: ['dashboard']
+    only: ['dashboard', 'postEdit']
   });
 
   Router.route('/', function () {
