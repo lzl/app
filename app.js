@@ -15,6 +15,7 @@ isAdmin = function () {
 
 Meteor.methods({
   logSubmit: function (val) {
+    check(val, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -25,12 +26,18 @@ Meteor.methods({
     });
   },
   anonymousLogSubmit: function (val) {
+    check(val, String);
     return AnonymousLogs.insert({
       text: val,
       createdAt: new Date()
     });
   },
   postSubmit: function (val) {
+    check(val, {
+      title: String,
+      text: String,
+      topic: String
+    });
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -48,6 +55,10 @@ Meteor.methods({
     return Meteor.call('logSubmit', autoLog);
   },
   anonymousCommentSubmit: function (val) {
+    check(val, {
+      text: String,
+      postId: String
+    });
     if (!val.text) {
       throw new Meteor.Error(411, "Length required.")
     }
@@ -58,18 +69,26 @@ Meteor.methods({
     });
   },
   logRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     return Logs.remove(id);
   },
   anonymousLogRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     return AnonymousLogs.remove(id);
   },
   postEdit: function (id, val) {
+    check(id, String);
+    check(val, {
+      title: String,
+      text: String,
+      topic: String
+    });
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -81,6 +100,7 @@ Meteor.methods({
     return Meteor.call('logSubmit', autoLog);
   },
   postRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -88,6 +108,7 @@ Meteor.methods({
     return AnonymousComments.remove({postId: id});
   },
   anonymousCommentRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -470,9 +491,11 @@ if (Meteor.isServer) {
     return Posts.find({}, {sort: {createdAt: -1}});
   });
   Meteor.publish('topicPosts', function (topic) {
+    check(topic, String);
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
   });
   Meteor.publish('singlePost', function (id) {
+    check(id, String);
     return Posts.find({_id: id});
   });
   Meteor.publish('allAnonymousComments', function () {
