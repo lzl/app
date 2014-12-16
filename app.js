@@ -140,7 +140,7 @@ if (Meteor.isClient) {
   });
 
   Router.route('/', function () {
-    this.wait([subs.subscribe('allPosts'), subs.subscribe('todayLogs')]);
+    this.wait([subs.subscribe('allPosts'), subs.subscribe('limitedLogs', 1)]);
     this.render('allPosts');
   }, {
     name: 'allPosts'
@@ -181,7 +181,7 @@ if (Meteor.isClient) {
 
   Router.route('/dashboard', function () {
     this.wait([
-      subs.subscribe('todayLogs'),
+      subs.subscribe('limitedLogs', 7),
       subs.subscribe('allAnonymousLogs'),
       subs.subscribe('allAnonymousComments')
     ]);
@@ -470,7 +470,7 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
   FastRender.route('/', function () {
     this.subscribe('allPosts');
-    this.subscribe('todayLogs');
+    this.subscribe('limitedLogs', 1);
   });
   FastRender.route('/t/:topic', function (params) {
     this.subscribe('topicPosts', params.topic);
@@ -479,9 +479,10 @@ if (Meteor.isServer) {
     this.subscribe('singlePost', params._id);
   });
 
-  Meteor.publish('todayLogs', function () {
+  Meteor.publish('limitedLogs', function (limit) {
+    check(limit, Number);
     var date = new Date();
-    date.setDate(date.getDate() - 1);
+    date.setDate(date.getDate() - limit);
     return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
   });
   Meteor.publish('allAnonymousLogs', function () {
