@@ -127,6 +127,10 @@ if (Meteor.isClient) {
     });
   };
 
+  var capitaliseFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   var subs = new SubsManager();
 
   Router.onBeforeAction(function () {
@@ -143,7 +147,10 @@ if (Meteor.isClient) {
     this.wait([subs.subscribe('allPosts'), subs.subscribe('limitedLogs', 1)]);
     this.render('allPosts');
   }, {
-    name: 'allPosts'
+    name: 'allPosts',
+    onAfterAction: function () {
+      document.title = 'LZL';
+    }
   });
 
   Router.route('/t/:topic', function () {
@@ -153,7 +160,12 @@ if (Meteor.isClient) {
     this.render('topicPosts');
     scroll(0,0);
   }, {
-    name:'topicPosts'
+    name:'topicPosts',
+    onAfterAction: function () {
+      var topic = this.params.topic;
+      topic = capitaliseFirstLetter(topic);
+      document.title = topic + ' - LZL';
+    }
   });
 
   Router.route('/p/:_id', function () {
@@ -165,7 +177,13 @@ if (Meteor.isClient) {
     });
     scroll(0,0);
   }, {
-    name: 'singlePost'
+    name: 'singlePost',
+    onAfterAction: function () {
+      var post = Posts.findOne({
+        _id: this.params._id
+      });
+      document.title = post.title + ' - LZL';
+    }
   });
 
   Router.route('/p/:_id/edit', function () {
@@ -176,7 +194,13 @@ if (Meteor.isClient) {
       }
     });
   }, {
-    name: 'postEdit'
+    name: 'postEdit',
+    onAfterAction: function () {
+      var post = Posts.findOne({
+        _id: this.params._id
+      });
+      document.title = post.title + ' - LZL';
+    }
   });
 
   Router.route('/dashboard', function () {
@@ -187,7 +211,10 @@ if (Meteor.isClient) {
     ]);
     this.render('dashboard');
   }, {
-    name: 'dashboard'
+    name: 'dashboard',
+    onAfterAction: function () {
+      document.title = 'Dashboard - LZL';
+    }
   });
 
   Template.registerHelper("dateTime", function (when) {
