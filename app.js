@@ -238,6 +238,12 @@ if (Meteor.isClient) {
     $('textarea').autosize();
   }
 
+  Template.navbar.helpers({
+    offline: function () {
+      return Meteor.status().connected;
+    }
+  });
+
   Template.cardForLogs.helpers({
     logs: function () {
       return Logs.find({}, {sort: {createdAt: -1}});
@@ -284,6 +290,13 @@ if (Meteor.isClient) {
   Template.anonymousComments.helpers({
     comments: function () {
       return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.navbar.events({
+    'click .reconnect': function (e) {
+      e.preventDefault();
+      Meteor.reconnect();
     }
   });
 
