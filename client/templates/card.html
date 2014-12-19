@@ -93,3 +93,47 @@
     </div>
   </div>
 </template>
+
+<template name="cardForSingleAnonymousComment">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Discussion: <a href="/p/{{post._id}}">{{post.title}}</a></h1>
+          </div>
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="pull-right"><code>{{dateTime comment.createdAt}}</code></span>
+              {{comment.text}}
+            </li>
+            {{#each comments}}
+              {{> singleAnonymousComment}}
+            {{/each}}
+          </ul>
+          <div class="panel-footer">
+            {{> anonymousCommentFormForSingleAnonymousComment}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="singleAnonymousComment">
+  <li class="list-group-item {{isAdmin}}">
+    <span class="pull-right"><code>{{dateTime createdAt}}</code></span>
+    {{text}}
+  </li>
+</template>
+
+<template name="anonymousCommentFormForSingleAnonymousComment">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Chat anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
+</template>

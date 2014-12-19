@@ -57,7 +57,9 @@ Meteor.methods({
   anonymousCommentSubmit: function (val) {
     check(val, {
       text: String,
-      postId: String
+      postId: Match.OneOf(String, null),
+      parentId: Match.OneOf(String, null),
+      userId: String
     });
     if (!val.text) {
       throw new Meteor.Error(411, "Length required.")
@@ -65,6 +67,8 @@ Meteor.methods({
     return AnonymousComments.insert({
       text: val.text,
       postId: val.postId,
+      parentId: val.parentId,
+      userId: val.userId,
       createdAt: new Date()
     });
   },
@@ -113,6 +117,13 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     return AnonymousComments.remove(id);
+  },
+  anonymousCommentRemoveChildren: function (id) {
+    check(id, String);
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    return AnonymousComments.remove({parentId: id});
   }
 });
 
@@ -200,6 +211,31 @@ if (Meteor.isClient) {
         _id: this.params._id
       });
       document.title = post.title + ' - LZL';
+    }
+  });
+
+  Router.route('/c/:_id', function () {
+    this.wait([
+      subs.subscribe('singleAnonymousComment', this.params._id),
+      subs.subscribe('singleAnonymousCommentChildren', this.params._id)
+    ]);
+    if (this.ready()) {
+      var comment = AnonymousComments.findOne(this.params._id);
+      subs.subscribe('singlePost', comment.postId);
+      this.render('cardForSingleAnonymousComment', {
+        data: function () {
+          return {
+            comment: AnonymousComments.findOne(this.params._id),
+            post: Posts.findOne(comment.postId)
+          };
+        }
+      });
+      scroll(0,0);
+    }
+  }, {
+    name: 'singleAnonymousComment',
+    onAfterAction: function () {
+      document.title = 'Discussion - LZL';
     }
   });
 
@@ -322,7 +358,23 @@ if (Meteor.isClient) {
 
   Template.anonymousComments.helpers({
     comments: function () {
-      return AnonymousComments.find({}, {sort: {createdAt: -1}});
+      return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.cardForSingleAnonymousComment.helpers({
+    comments: function () {
+      return AnonymousComments.find({parentId: this.comment._id}, {sort: {createdAt: 1}});
+    }
+  });
+
+  Template.singleAnonymousComment.helpers({
+    isAdmin: function () {
+      if (this.userId !== "anonymousUserId") {
+        return "list-group-item-info";
+      } else {
+        return;
+      }
     }
   });
 
@@ -384,12 +436,20 @@ if (Meteor.isClient) {
   Template.anonymousCommentButtons.events({
     'click .link': function (e) {
       e.preventDefault();
-      var id = this.postId;
-      Router.go('singlePost', {_id: id});
+      if (this.postId) {
+        var id = this._id;
+        Router.go('singleAnonymousComment', {_id: id});
+      } else if (this.parentId) {
+        var id = this.parentId;
+        Router.go('singleAnonymousComment', {_id: id});
+      }
     },
     'click .delete': function (e) {
       e.preventDefault();
       var id = this._id;
+      if (this.postId) {
+        var isParent = true;
+      }
       swal({
         title: "Are you sure?",
         text: "You will not be able to recover this comment!",
@@ -399,6 +459,9 @@ if (Meteor.isClient) {
         confirmButtonText: "Yes, delete it!",
         closeOnConfirm: true
       }, function () {
+        if (isParent) {
+          Meteor.call('anonymousCommentRemoveChildren', id);
+        }
         Meteor.call('anonymousCommentRemove', id);
       });
     }
@@ -456,7 +519,7 @@ if (Meteor.isClient) {
       text = $.trim(text);
       if (!text) return;
       var postId = tmpl.data._id;
-      var val = {text: text, postId: postId};
+      var val = {text: text, postId: postId, parentId: null, userId: "anonymousUserId"};
       swal({
         title: "Preview",
         text: text,
@@ -464,16 +527,37 @@ if (Meteor.isClient) {
         showCancelButton: true,
         confirmButtonText: "Yes, submit it!",
         cancelButtonText: "No, cancel plx!",
-        closeOnConfirm: false,
+        closeOnConfirm: true,
         }, function (isConfirm) {
           if (isConfirm) {
-            Meteor.call('anonymousCommentSubmit', val);
-            swal("Good job!", "Your question is submitted!", "success");
-            tmpl.find('form').reset();
+            var id = Meteor.call('anonymousCommentSubmit', val,
+              function (error, result) {
+                Router.go('singleAnonymousComment', {_id: result});
+            });
           } else {
             tmpl.find('form').focus();
           }
       });
+    }
+  });
+
+  Template.anonymousCommentFormForSingleAnonymousComment.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var text = tmpl.find('[type=text]').value;
+      text = $.trim(text);
+      var userId;
+      if (!text) return;
+      var parentId = tmpl.data.comment._id;
+      if (isAdmin()) {
+        userId = Meteor.userId();
+      } else {
+        userId = "anonymousUserId";
+      }
+      var val = {text: text, postId: null, parentId: parentId, userId: userId};
+      Meteor.call('anonymousCommentSubmit', val);
+      tmpl.find('form').reset();
+      tmpl.find('form').focus();
     }
   });
 
@@ -492,7 +576,7 @@ if (Meteor.isClient) {
       var id = this._id;
       var val = {title: title, text: text, topic: topic};
       Meteor.call('postEdit', id, val);
-      Router.go('singlePost', {_id: id});;
+      Router.go('singlePost', {_id: id});
     },
     'click .delete': function(e) {
       e.preventDefault();
@@ -546,7 +630,15 @@ if (Meteor.isServer) {
     return Posts.find({_id: id});
   });
   Meteor.publish('allAnonymousComments', function () {
-    return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
+  });
+  Meteor.publish('singleAnonymousComment', function (id) {
+    check(id, String);
+    return AnonymousComments.find({_id: id});
+  });
+  Meteor.publish('singleAnonymousCommentChildren', function (id) {
+    check(id, String);
+    return AnonymousComments.find({parentId: id}, {sort: {createdAt: 1}});
   });
 
   // via https://dweldon.silvrback.com/common-mistakes
