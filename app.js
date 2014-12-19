@@ -273,7 +273,13 @@ if (Meteor.isClient) {
 
   Template.cardForLogs.helpers({
     logs: function () {
-      return Logs.find({}, {sort: {createdAt: -1}});
+      if (Router.current().route.getName() === "dashboard") {
+        return Logs.find({}, {sort: {createdAt: -1}});
+      } else {
+        var date = new Date();
+        date.setDate(date.getDate() - 1);
+        return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+      }
     }
   });
 
