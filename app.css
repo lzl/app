@@ -25,3 +25,8 @@ code {
      -moz-hyphens: auto;
           hyphens: auto;
 }
+
+.timestamp code {
+  font-size: 80%;
+  color: #333;
+}

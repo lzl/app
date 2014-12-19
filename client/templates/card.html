@@ -42,7 +42,7 @@
     {{#if isInRole 'admin'}}
       {{> cardForSingleLogButtons}}
     {{/if}}
-    <span class="pull-right"><code>{{timestamp createdAt}}</code></span>
+    <span class="pull-right timestamp"><code>{{timestamp createdAt}}</code></span>
     {{#markdown}}{{text}}{{/markdown}}
   </li>
 </template>
@@ -77,7 +77,7 @@
           </div>
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
           <div class="panel-footer">
-            <span>{{dateTime createdAt}}</span>
+            <span class="timestamp"><code>{{dateTime createdAt}}</code></span>
             <span class="pull-right">
               <a href="{{pathFor route='topicPosts'}}">{{topic}}</a>
               {{#if isInRole 'admin'}}
@@ -92,4 +92,58 @@
       </div>
     </div>
   </div>
+</template>
+
+<template name="cardForSingleAnonymousComment">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8 col-md-offset-2">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            It's recommended to bookmark this private page to receive my future reply.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Discussion: <a href="/p/{{post._id}}">{{post.title}}</a></h1>
+          </div>
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="pull-right timestamp"><code>{{dateTime comment.createdAt}}</code></span>
+              {{comment.text}}
+            </li>
+            {{#each comments}}
+              {{> singleAnonymousComment}}
+            {{/each}}
+          </ul>
+          <div class="panel-footer">
+            {{> anonymousCommentFormForSingleAnonymousComment}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="singleAnonymousComment">
+  <li class="list-group-item {{isAdmin}}">
+    <span class="pull-right timestamp"><code>{{dateTime createdAt}}</code></span>
+    {{text}}
+  </li>
+</template>
+
+<template name="anonymousCommentFormForSingleAnonymousComment">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Chat anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
 </template>
