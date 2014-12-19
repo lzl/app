@@ -608,6 +608,10 @@ if (Meteor.isServer) {
   FastRender.route('/p/:_id', function (params) {
     this.subscribe('singlePost', params._id);
   });
+  FastRender.route('/c/:_id', function (params) {
+    this.subscribe('singleAnonymousComment', params._id);
+    this.subscribe('singleAnonymousCommentChildren', params._id);
+  });
 
   Meteor.publish('limitedLogs', function (limit) {
     check(limit, Number);
