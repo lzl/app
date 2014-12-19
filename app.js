@@ -598,6 +598,11 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
+  // Meteor.startup(function () {
+  //   Roles.createRole("admin");
+  //   Roles.addUsersToRoles(id, "admin");
+  // });
+
   FastRender.route('/', function () {
     this.subscribe('allPosts');
     this.subscribe('limitedLogs', 1);
