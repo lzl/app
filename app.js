@@ -15,6 +15,7 @@ isAdmin = function () {
 
 Meteor.methods({
   logSubmit: function (val) {
+    check(val, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
@@ -25,69 +26,104 @@ Meteor.methods({
     });
   },
   anonymousLogSubmit: function (val) {
+    check(val, String);
     return AnonymousLogs.insert({
       text: val,
       createdAt: new Date()
     });
   },
   postSubmit: function (val) {
+    check(val, {
+      title: String,
+      text: String,
+      topic: String
+    });
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     if (!val.title || !val.text || !val.topic) {
       throw new Meteor.Error(411, "Length required.")
     }
-    return Posts.insert({
+    var postId = Posts.insert({
       title: val.title,
       text: val.text,
       topic: val.topic,
       userId: Meteor.userId(),
       createdAt: new Date()
     });
+    var autoLog = 'New: [' + val.title + '](/p/' + postId + ')';
+    return Meteor.call('logSubmit', autoLog);
   },
   anonymousCommentSubmit: function (val) {
+    check(val, {
+      text: String,
+      postId: Match.OneOf(String, null),
+      parentId: Match.OneOf(String, null),
+      userId: String
+    });
     if (!val.text) {
       throw new Meteor.Error(411, "Length required.")
     }
     return AnonymousComments.insert({
       text: val.text,
       postId: val.postId,
+      parentId: val.parentId,
+      userId: val.userId,
       createdAt: new Date()
     });
   },
   logRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    Logs.remove(id);
+    return Logs.remove(id);
   },
   anonymousLogRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    AnonymousLogs.remove(id);
+    return AnonymousLogs.remove(id);
   },
   postEdit: function (id, val) {
+    check(id, String);
+    check(val, {
+      title: String,
+      text: String,
+      topic: String
+    });
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     if (!val.title || !val.text || !val.topic) {
-      throw new Meteor.Error(411, "Length required.")
+      throw new Meteor.Error(411, "Length required.");
     }
     Posts.update(id, {$set: val});
+    var autoLog = 'Updated: [' + val.title + '](/p/' + id + ')';
+    return Meteor.call('logSubmit', autoLog);
   },
   postRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     Posts.remove(id);
-    AnonymousComments.remove({postId: id});
+    return AnonymousComments.remove({postId: id});
   },
   anonymousCommentRemove: function (id) {
+    check(id, String);
     if (! isAdmin()) {
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
-    AnonymousComments.remove(id);
+    return AnonymousComments.remove(id);
+  },
+  anonymousCommentRemoveChildren: function (id) {
+    check(id, String);
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    return AnonymousComments.remove({parentId: id});
   }
 });
 
@@ -102,6 +138,10 @@ if (Meteor.isClient) {
     });
   };
 
+  var capitaliseFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   var subs = new SubsManager();
 
   Router.onBeforeAction(function () {
@@ -111,14 +151,17 @@ if (Meteor.isClient) {
       this.render('login');
     }
   }, {
-    only: ['dashboard']
+    only: ['dashboard', 'postEdit']
   });
 
   Router.route('/', function () {
-    this.wait([subs.subscribe('allPosts'), subs.subscribe('todayLogs')]);
+    this.wait([subs.subscribe('allPosts'), subs.subscribe('limitedLogs', 1)]);
     this.render('allPosts');
   }, {
-    name: 'allPosts'
+    name: 'allPosts',
+    onAfterAction: function () {
+      document.title = 'LZL';
+    }
   });
 
   Router.route('/t/:topic', function () {
@@ -128,7 +171,12 @@ if (Meteor.isClient) {
     this.render('topicPosts');
     scroll(0,0);
   }, {
-    name:'topicPosts'
+    name:'topicPosts',
+    onAfterAction: function () {
+      var topic = this.params.topic;
+      topic = capitaliseFirstLetter(topic);
+      document.title = topic + ' - LZL';
+    }
   });
 
   Router.route('/p/:_id', function () {
@@ -140,7 +188,13 @@ if (Meteor.isClient) {
     });
     scroll(0,0);
   }, {
-    name: 'singlePost'
+    name: 'singlePost',
+    onAfterAction: function () {
+      var post = Posts.findOne({
+        _id: this.params._id
+      });
+      document.title = post.title + ' - LZL';
+    }
   });
 
   Router.route('/p/:_id/edit', function () {
@@ -151,18 +205,52 @@ if (Meteor.isClient) {
       }
     });
   }, {
-    name: 'postEdit'
+    name: 'postEdit',
+    onAfterAction: function () {
+      var post = Posts.findOne({
+        _id: this.params._id
+      });
+      document.title = post.title + ' - LZL';
+    }
+  });
+
+  Router.route('/c/:_id', function () {
+    this.wait([
+      subs.subscribe('singleAnonymousComment', this.params._id),
+      subs.subscribe('singleAnonymousCommentChildren', this.params._id)
+    ]);
+    if (this.ready()) {
+      var comment = AnonymousComments.findOne(this.params._id);
+      subs.subscribe('singlePost', comment.postId);
+      this.render('cardForSingleAnonymousComment', {
+        data: function () {
+          return {
+            comment: AnonymousComments.findOne(this.params._id),
+            post: Posts.findOne(comment.postId)
+          };
+        }
+      });
+      scroll(0,0);
+    }
+  }, {
+    name: 'singleAnonymousComment',
+    onAfterAction: function () {
+      document.title = 'Discussion - LZL';
+    }
   });
 
   Router.route('/dashboard', function () {
     this.wait([
-      subs.subscribe('todayLogs'),
+      subs.subscribe('limitedLogs', 7),
       subs.subscribe('allAnonymousLogs'),
       subs.subscribe('allAnonymousComments')
     ]);
     this.render('dashboard');
   }, {
-    name: 'dashboard'
+    name: 'dashboard',
+    onAfterAction: function () {
+      document.title = 'Dashboard - LZL';
+    }
   });
 
   Template.registerHelper("dateTime", function (when) {
@@ -181,7 +269,31 @@ if (Meteor.isClient) {
     masonry();
   };
 
+  Template.cardForSingleLog.destroyed = function () {
+    masonry();
+  };
+
   Template.cardForPosts.rendered = function () {
+    masonry();
+  };
+
+  Template.cardForPosts.destroyed = function () {
+    masonry();
+  };
+
+  Template.anonymousLog.rendered = function () {
+    masonry();
+  };
+
+  Template.anonymousLog.destroyed = function () {
+    masonry();
+  };
+
+  Template.anonymousComment.rendered = function () {
+    masonry();
+  };
+
+  Template.anonymousComment.destroyed = function () {
     masonry();
   };
 
@@ -189,9 +301,21 @@ if (Meteor.isClient) {
     $('textarea').autosize();
   }
 
+  Template.navbar.helpers({
+    offline: function () {
+      return Meteor.status().connected;
+    }
+  });
+
   Template.cardForLogs.helpers({
     logs: function () {
-      return Logs.find({}, {sort: {createdAt: -1}});
+      if (Router.current().route.getName() === "dashboard") {
+        return Logs.find({}, {sort: {createdAt: -1}});
+      } else {
+        var date = new Date();
+        date.setDate(date.getDate() - 1);
+        return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+      }
     }
   });
 
@@ -234,7 +358,30 @@ if (Meteor.isClient) {
 
   Template.anonymousComments.helpers({
     comments: function () {
-      return AnonymousComments.find({}, {sort: {createdAt: -1}});
+      return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.cardForSingleAnonymousComment.helpers({
+    comments: function () {
+      return AnonymousComments.find({parentId: this.comment._id}, {sort: {createdAt: 1}});
+    }
+  });
+
+  Template.singleAnonymousComment.helpers({
+    isAdmin: function () {
+      if (this.userId !== "anonymousUserId") {
+        return "list-group-item-info";
+      } else {
+        return;
+      }
+    }
+  });
+
+  Template.navbar.events({
+    'click .reconnect': function (e) {
+      e.preventDefault();
+      Meteor.reconnect();
     }
   });
 
@@ -289,12 +436,20 @@ if (Meteor.isClient) {
   Template.anonymousCommentButtons.events({
     'click .link': function (e) {
       e.preventDefault();
-      var id = this.postId;
-      Router.go('singlePost', {_id: id});
+      if (this.postId) {
+        var id = this._id;
+        Router.go('singleAnonymousComment', {_id: id});
+      } else if (this.parentId) {
+        var id = this.parentId;
+        Router.go('singleAnonymousComment', {_id: id});
+      }
     },
     'click .delete': function (e) {
       e.preventDefault();
       var id = this._id;
+      if (this.postId) {
+        var isParent = true;
+      }
       swal({
         title: "Are you sure?",
         text: "You will not be able to recover this comment!",
@@ -304,6 +459,9 @@ if (Meteor.isClient) {
         confirmButtonText: "Yes, delete it!",
         closeOnConfirm: true
       }, function () {
+        if (isParent) {
+          Meteor.call('anonymousCommentRemoveChildren', id);
+        }
         Meteor.call('anonymousCommentRemove', id);
       });
     }
@@ -361,7 +519,7 @@ if (Meteor.isClient) {
       text = $.trim(text);
       if (!text) return;
       var postId = tmpl.data._id;
-      var val = {text: text, postId: postId};
+      var val = {text: text, postId: postId, parentId: null, userId: "anonymousUserId"};
       swal({
         title: "Preview",
         text: text,
@@ -369,16 +527,37 @@ if (Meteor.isClient) {
         showCancelButton: true,
         confirmButtonText: "Yes, submit it!",
         cancelButtonText: "No, cancel plx!",
-        closeOnConfirm: false,
+        closeOnConfirm: true,
         }, function (isConfirm) {
           if (isConfirm) {
-            Meteor.call('anonymousCommentSubmit', val);
-            swal("Good job!", "Your question is submitted!", "success");
-            tmpl.find('form').reset();
+            var id = Meteor.call('anonymousCommentSubmit', val,
+              function (error, result) {
+                Router.go('singleAnonymousComment', {_id: result});
+            });
           } else {
             tmpl.find('form').focus();
           }
       });
+    }
+  });
+
+  Template.anonymousCommentFormForSingleAnonymousComment.events({
+    'submit form': function (e, tmpl) {
+      e.preventDefault();
+      var text = tmpl.find('[type=text]').value;
+      text = $.trim(text);
+      var userId;
+      if (!text) return;
+      var parentId = tmpl.data.comment._id;
+      if (isAdmin()) {
+        userId = Meteor.userId();
+      } else {
+        userId = "anonymousUserId";
+      }
+      var val = {text: text, postId: null, parentId: parentId, userId: userId};
+      Meteor.call('anonymousCommentSubmit', val);
+      tmpl.find('form').reset();
+      tmpl.find('form').focus();
     }
   });
 
@@ -397,7 +576,7 @@ if (Meteor.isClient) {
       var id = this._id;
       var val = {title: title, text: text, topic: topic};
       Meteor.call('postEdit', id, val);
-      Router.go('singlePost', {_id: id});;
+      Router.go('singlePost', {_id: id});
     },
     'click .delete': function(e) {
       e.preventDefault();
@@ -416,54 +595,17 @@ if (Meteor.isClient) {
       });
     }
   });
-
-  Tracker.autorun(function () {
-    var query = Logs.find();
-    var handle = query.observeChanges({
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = Posts.find();
-    var handle = query.observeChanges({
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = AnonymousLogs.find();
-    var handle = query.observeChanges({
-      added: function () {
-        masonry();
-      },
-      removed: function () {
-        masonry();
-      }
-    });
-  });
-
-  Tracker.autorun(function () {
-    var query = AnonymousComments.find();
-    var handle = query.observeChanges({
-      added: function () {
-        masonry();
-      },
-      removed: function () {
-        masonry();
-      }
-    });
-  });
 }
 
 if (Meteor.isServer) {
+  // Meteor.startup(function () {
+  //   Roles.createRole("admin");
+  //   Roles.addUsersToRoles(id, "admin");
+  // });
+
   FastRender.route('/', function () {
     this.subscribe('allPosts');
-    this.subscribe('todayLogs');
+    this.subscribe('limitedLogs', 1);
   });
   FastRender.route('/t/:topic', function (params) {
     this.subscribe('topicPosts', params.topic);
@@ -471,10 +613,15 @@ if (Meteor.isServer) {
   FastRender.route('/p/:_id', function (params) {
     this.subscribe('singlePost', params._id);
   });
+  FastRender.route('/c/:_id', function (params) {
+    this.subscribe('singleAnonymousComment', params._id);
+    this.subscribe('singleAnonymousCommentChildren', params._id);
+  });
 
-  Meteor.publish('todayLogs', function () {
+  Meteor.publish('limitedLogs', function (limit) {
+    check(limit, Number);
     var date = new Date();
-    date.setDate(date.getDate() - 1);
+    date.setDate(date.getDate() - limit);
     return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
   });
   Meteor.publish('allAnonymousLogs', function () {
@@ -484,13 +631,23 @@ if (Meteor.isServer) {
     return Posts.find({}, {sort: {createdAt: -1}});
   });
   Meteor.publish('topicPosts', function (topic) {
+    check(topic, String);
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
   });
   Meteor.publish('singlePost', function (id) {
+    check(id, String);
     return Posts.find({_id: id});
   });
   Meteor.publish('allAnonymousComments', function () {
-    return AnonymousComments.find({}, {sort: {createdAt: -1}});
+    return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
+  });
+  Meteor.publish('singleAnonymousComment', function (id) {
+    check(id, String);
+    return AnonymousComments.find({_id: id});
+  });
+  Meteor.publish('singleAnonymousCommentChildren', function (id) {
+    check(id, String);
+    return AnonymousComments.find({parentId: id}, {sort: {createdAt: 1}});
   });
 
   // via https://dweldon.silvrback.com/common-mistakes
