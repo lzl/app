@@ -1,7 +1,6 @@
 Posts = new Mongo.Collection('posts');
 Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
-AnonymousLogs = new Mongo.Collection('anonymousLogs');
 
 Router.configure({
   layoutTemplate: 'appBody'
@@ -22,13 +21,6 @@ Meteor.methods({
     return Logs.insert({
       text: val,
       userId: Meteor.userId(),
-      createdAt: new Date()
-    });
-  },
-  anonymousLogSubmit: function (val) {
-    check(val, String);
-    return AnonymousLogs.insert({
-      text: val,
       createdAt: new Date()
     });
   },
@@ -78,13 +70,6 @@ Meteor.methods({
       throw new Meteor.Error(401, "The request requires user authentication.");
     }
     return Logs.remove(id);
-  },
-  anonymousLogRemove: function (id) {
-    check(id, String);
-    if (! isAdmin()) {
-      throw new Meteor.Error(401, "The request requires user authentication.");
-    }
-    return AnonymousLogs.remove(id);
   },
   postEditForm: function (id, val) {
     check(id, String);

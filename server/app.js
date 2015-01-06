@@ -13,8 +13,8 @@ FastRender.route('/p/:_id', function (params) {
   this.subscribe('singlePost', params._id);
 });
 FastRender.route('/c/:_id', function (params) {
-  this.subscribe('anonymousCommentItem', params._id);
-  this.subscribe('anonymousCommentItemChildren', params._id);
+  this.subscribe('anonymousCommentWideItem', params._id);
+  this.subscribe('anonymousCommentWideItemChildren', params._id);
 });
 
 Meteor.publish('limitedLogs', function (limit) {
@@ -22,9 +22,6 @@ Meteor.publish('limitedLogs', function (limit) {
   var date = new Date();
   date.setDate(date.getDate() - limit);
   return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
-});
-Meteor.publish('allAnonymousLogs', function () {
-  return AnonymousLogs.find({}, {sort: {createdAt: -1}});
 });
 Meteor.publish('allPosts', function () {
   return Posts.find({}, {sort: {createdAt: -1}});
@@ -40,11 +37,11 @@ Meteor.publish('singlePost', function (id) {
 Meteor.publish('allAnonymousComments', function () {
   return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
 });
-Meteor.publish('anonymousCommentItem', function (id) {
+Meteor.publish('anonymousCommentWideItem', function (id) {
   check(id, String);
   return AnonymousComments.find({_id: id});
 });
-Meteor.publish('anonymousCommentItemChildren', function (id) {
+Meteor.publish('anonymousCommentWideItemChildren', function (id) {
   check(id, String);
   return AnonymousComments.find({parentId: id}, {sort: {createdAt: 1}});
 });

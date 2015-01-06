@@ -7,7 +7,7 @@
         </div>
         <ul class="list-group">
           {{#each logs}}
-          {{> logItem}}
+            {{> logItem}}
           {{/each}}
           <li class="list-group-item">EOF</li>
         </ul>
@@ -16,21 +16,10 @@
   </div>
 </template>
 
-<template name="logSubmitForm">
-  <form role="form">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="What I learned today">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="submit">Submit</button>
-      </span>
-    </div>
-  </form>
-</template>
-
 <template name="logItem">
   <li class="list-group-item no-margin">
     {{#if isInRole 'admin'}}
-    {{> logItemButtons}}
+      {{> logItemButtons}}
     {{/if}}
     <span class="pull-right timestamp"><code>{{timestamp createdAt}}</code></span>
     {{#markdown}}{{text}}{{/markdown}}
@@ -41,13 +30,22 @@
   <button type="button" class="btn btn-default btn-xs pull-right delete">delete</button>
 </template>
 
-<template name="anonymousLogSubmitForm">
-  <form role="form">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Tell me yours anonymously">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="submit">Preview</button>
-      </span>
+<template name="logInsertForm">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading full-width">
+          <h2 class="panel-title">New log</h2>
+        </div>
+        <div class="panel-body">
+          <form role="form">
+            <div class="form-group">
+              <textarea type="text" class="form-control" id="logText" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </form>
+  </div>
 </template>

@@ -51,7 +51,7 @@ Router.route('/t/:topic', function () {
 
 Router.route('/p/:_id', function () {
   this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postPanelForSinglePost', {
+  this.render('postWidePanel', {
     data: function () {
       return Posts.findOne(this.params._id);
     }
@@ -86,24 +86,24 @@ Router.route('/p/:_id/edit', function () {
 
 Router.route('/c/:_id', function () {
   this.wait([
-    subs.subscribe('anonymousCommentItem', this.params._id),
-    subs.subscribe('anonymousCommentItemChildren', this.params._id)
-    ]);
-    if (this.ready()) {
-      var comment = AnonymousComments.findOne(this.params._id);
-      subs.subscribe('singlePost', comment.postId);
-      this.render('anonymousCommentsPanelForChat', {
-        data: function () {
-          return {
-            comment: AnonymousComments.findOne(this.params._id),
-            post: Posts.findOne(comment.postId)
-          };
-        }
-      });
-      scroll(0,0);
-    }
+    subs.subscribe('anonymousCommentWideItem', this.params._id),
+    subs.subscribe('anonymousCommentWideItemChildren', this.params._id)
+  ]);
+  if (this.ready()) {
+    var comment = AnonymousComments.findOne(this.params._id);
+    subs.subscribe('singlePost', comment.postId);
+    this.render('anonymousCommentsWidePanel', {
+      data: function () {
+        return {
+          comment: AnonymousComments.findOne(this.params._id),
+          post: Posts.findOne(comment.postId)
+        };
+      }
+    });
+    scroll(0,0);
+  }
 }, {
-  name: 'anonymousCommentItem',
+  name: 'anonymousCommentWideItem',
   onAfterAction: function () {
     document.title = 'Discussion - LZL';
   }
@@ -112,7 +112,6 @@ Router.route('/c/:_id', function () {
 Router.route('/dashboard', function () {
   this.wait([
     subs.subscribe('limitedLogs', 7),
-    subs.subscribe('allAnonymousLogs'),
     subs.subscribe('allAnonymousComments')
     ]);
     this.render('dashboard');
@@ -151,19 +150,11 @@ Template.postPanel.destroyed = function () {
   masonry();
 };
 
-Template.anonymousLogItem.rendered = function () {
+Template.anonymousCommentItem.rendered = function () {
   masonry();
 };
 
-Template.anonymousLogItem.destroyed = function () {
-  masonry();
-};
-
-Template.anonymousComment.rendered = function () {
-  masonry();
-};
-
-Template.anonymousComment.destroyed = function () {
+Template.anonymousCommentItem.destroyed = function () {
   masonry();
 };
 
@@ -220,25 +211,19 @@ Template.topicPosts.helpers({
   }
 });
 
-Template.anonymousLogsPanel.helpers({
-  logs: function () {
-    return AnonymousLogs.find({}, {sort: {createdAt: -1}});
-  }
-});
-
 Template.anonymousCommentsPanel.helpers({
   comments: function () {
     return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
   }
 });
 
-Template.anonymousCommentsPanelForChat.helpers({
+Template.anonymousCommentsWidePanel.helpers({
   comments: function () {
     return AnonymousComments.find({parentId: this.comment._id}, {sort: {createdAt: 1}});
   }
 });
 
-Template.anonymousCommentItem.helpers({
+Template.anonymousCommentWideItem.helpers({
   isAdmin: function () {
     if (this.userId !== "anonymousUserId") {
       return "list-group-item-info";
@@ -255,10 +240,13 @@ Template.navbar.events({
   }
 });
 
-Template.logSubmitForm.events({
+Template.logInsertForm.events({
+  'keyup textarea': function () {
+    $('textarea').autosize();
+  },
   'submit form': function (e, tmpl) {
     e.preventDefault();
-    var text = tmpl.find('[type=text]').value;
+    var text = tmpl.find('#logText').value;
     text = $.trim(text);
     if (!text) return;
     Meteor.call('logSubmit', text);
@@ -285,33 +273,15 @@ Template.logItemButtons.events({
   }
 });
 
-Template.anonymousLogButtons.events({
-  'click .delete': function (e) {
-    e.preventDefault();
-    var id = this._id;
-    swal({
-      title: "Are you sure?",
-      text: "You will not be able to recover this log!",
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: "Yes, delete it!",
-      closeOnConfirm: true
-    }, function () {
-      Meteor.call('anonymousLogRemove', id);
-    });
-  }
-});
-
-Template.anonymousCommentButtons.events({
+Template.anonymousCommentItemButtons.events({
   'click .link': function (e) {
     e.preventDefault();
     if (this.postId) {
       var id = this._id;
-      Router.go('anonymousCommentItem', {_id: id});
+      Router.go('anonymousCommentWideItem', {_id: id});
     } else if (this.parentId) {
       var id = this.parentId;
-      Router.go('anonymousCommentItem', {_id: id});
+      Router.go('anonymousCommentWideItem', {_id: id});
     }
   },
   'click .delete': function (e) {
@@ -356,33 +326,7 @@ Template.postInsertForm.events({
   }
 });
 
-Template.anonymousLogSubmitForm.events({
-  'submit form': function (e, tmpl) {
-    e.preventDefault();
-    var text = tmpl.find('[type=text]').value;
-    text = $.trim(text);
-    if (!text) return;
-    swal({
-      title: "Preview",
-      text: text,
-      type: "info",
-      showCancelButton: true,
-      confirmButtonText: "Yes, submit it!",
-      cancelButtonText: "No, cancel plx!",
-      closeOnConfirm: false,
-    }, function (isConfirm) {
-      if (isConfirm) {
-        Meteor.call('anonymousLogSubmit', text);
-        swal("Thank you!", "You learned a lot today!", "success");
-        tmpl.find('form').reset();
-      } else {
-        tmpl.find('form').focus();
-      }
-    });
-  }
-});
-
-Template.anonymousCommentSubmitForm.events({
+Template.anonymousCommentInsertForm.events({
   'submit form': function (e, tmpl) {
     e.preventDefault();
     var text = tmpl.find('[type=text]').value;
@@ -402,7 +346,7 @@ Template.anonymousCommentSubmitForm.events({
       if (isConfirm) {
         var id = Meteor.call('anonymousCommentSubmit', val,
         function (error, result) {
-          Router.go('anonymousCommentItem', {_id: result});
+          Router.go('anonymousCommentWideItem', {_id: result});
         });
       } else {
         tmpl.find('form').focus();
@@ -411,7 +355,7 @@ Template.anonymousCommentSubmitForm.events({
   }
 });
 
-Template.anonymousCommentSubmitFormForChat.events({
+Template.anonymousCommentInsertWideForm.events({
   'submit form': function (e, tmpl) {
     e.preventDefault();
     var text = tmpl.find('[type=text]').value;
