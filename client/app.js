@@ -25,7 +25,7 @@ Router.onBeforeAction(function () {
 });
 
 Router.route('/', function () {
-  this.wait([subs.subscribe('allPosts'), subs.subscribe('limitedLogs', 1)]);
+  this.wait([subs.subscribe('mainPosts'), subs.subscribe('otherPosts'), subs.subscribe('limitedLogs', 1)]);
   this.render('allPosts');
 }, {
   name: 'allPosts',

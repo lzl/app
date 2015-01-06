@@ -3,7 +3,8 @@
 // Roles.addUsersToRoles(id, "admin");
 
 FastRender.route('/', function () {
-  this.subscribe('allPosts');
+  this.subscribe('mainPosts');
+  this.subscribe('otherPosts');
   this.subscribe('limitedLogs', 1);
 });
 FastRender.route('/t/:topic', function (params) {
@@ -23,8 +24,16 @@ Meteor.publish('limitedLogs', function (limit) {
   date.setDate(date.getDate() - limit);
   return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
 });
-Meteor.publish('allPosts', function () {
-  return Posts.find({}, {sort: {createdAt: -1}});
+// Meteor.publish('allPosts', function () {
+//   return Posts.find({}, {sort: {createdAt: -1}});
+// });
+Meteor.publish('mainPosts', function () {
+  return Posts.find({topic: {$in: ['unschooling', 'meteor']}}, {sort: {createdAt: -1}, limit: 20});
+});
+Meteor.publish('otherPosts', function () {
+  var date = new Date();
+  date.setDate(date.getDate() - 30);
+  return Posts.find({topic: {$nin: ['unschooling', 'meteor']}, createdAt: {$gte: date}}, {sort: {createdAt: -1}});
 });
 Meteor.publish('topicPosts', function (topic) {
   check(topic, String);
@@ -35,7 +44,9 @@ Meteor.publish('singlePost', function (id) {
   return Posts.find({_id: id});
 });
 Meteor.publish('allAnonymousComments', function () {
-  return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
+  var date = new Date();
+  date.setDate(date.getDate() - 7);
+  return AnonymousComments.find({userId: "anonymousUserId", createdAt: {$gte: date}}, {sort: {createdAt: -1}});
 });
 Meteor.publishComposite('anonymousCommentAndPost', function (id) {
   check(id, String);
