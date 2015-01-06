@@ -1,1 +1,4 @@
 settings.json
+meteor-restore.sh
+meteor-dump.sh
+dump
