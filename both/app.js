@@ -24,6 +24,13 @@ Meteor.methods({
       createdAt: new Date()
     });
   },
+  logRemove: function (id) {
+    check(id, String);
+    if (! isAdmin()) {
+      throw new Meteor.Error(401, "The request requires user authentication.");
+    }
+    return Logs.remove(id);
+  },
   postSubmit: function (val) {
     check(val, {
       title: String,
@@ -46,32 +53,7 @@ Meteor.methods({
     var autoLog = 'New: [' + val.title + '](/p/' + postId + ')';
     return Meteor.call('logSubmit', autoLog);
   },
-  anonymousCommentSubmit: function (val) {
-    check(val, {
-      text: String,
-      postId: Match.OneOf(String, null),
-      parentId: Match.OneOf(String, null),
-      userId: String
-    });
-    if (!val.text) {
-      throw new Meteor.Error(411, "Length required.")
-    }
-    return AnonymousComments.insert({
-      text: val.text,
-      postId: val.postId,
-      parentId: val.parentId,
-      userId: val.userId,
-      createdAt: new Date()
-    });
-  },
-  logRemove: function (id) {
-    check(id, String);
-    if (! isAdmin()) {
-      throw new Meteor.Error(401, "The request requires user authentication.");
-    }
-    return Logs.remove(id);
-  },
-  postEditForm: function (id, val) {
+  postEdit: function (id, val) {
     check(id, String);
     check(val, {
       title: String,
@@ -95,6 +77,24 @@ Meteor.methods({
     }
     Posts.remove(id);
     return AnonymousComments.remove({postId: id});
+  },
+  anonymousCommentSubmit: function (val) {
+    check(val, {
+      text: String,
+      postId: Match.OneOf(String, null),
+      parentId: Match.OneOf(String, null),
+      userId: String
+    });
+    if (!val.text) {
+      throw new Meteor.Error(411, "Length required.")
+    }
+    return AnonymousComments.insert({
+      text: val.text,
+      postId: val.postId,
+      parentId: val.parentId,
+      userId: val.userId,
+      createdAt: new Date()
+    });
   },
   anonymousCommentRemove: function (id) {
     check(id, String);

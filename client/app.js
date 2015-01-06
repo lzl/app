@@ -86,16 +86,15 @@ Router.route('/p/:_id/edit', function () {
 
 Router.route('/c/:_id', function () {
   this.wait([
-    subs.subscribe('anonymousCommentWideItem', this.params._id),
-    subs.subscribe('anonymousCommentWideItemChildren', this.params._id)
+    subs.subscribe('anonymousCommentAndPost', this.params._id),
+    subs.subscribe('anonymousCommentChildren', this.params._id)
   ]);
   if (this.ready()) {
     var comment = AnonymousComments.findOne(this.params._id);
-    subs.subscribe('singlePost', comment.postId);
     this.render('anonymousCommentsWidePanel', {
       data: function () {
         return {
-          comment: AnonymousComments.findOne(this.params._id),
+          comment: comment,
           post: Posts.findOne(comment.postId)
         };
       }
@@ -103,7 +102,7 @@ Router.route('/c/:_id', function () {
     scroll(0,0);
   }
 }, {
-  name: 'anonymousCommentWideItem',
+  name: 'anonymousComments',
   onAfterAction: function () {
     document.title = 'Discussion - LZL';
   }
@@ -113,8 +112,8 @@ Router.route('/dashboard', function () {
   this.wait([
     subs.subscribe('limitedLogs', 7),
     subs.subscribe('allAnonymousComments')
-    ]);
-    this.render('dashboard');
+  ]);
+  this.render('dashboard');
   }, {
   name: 'dashboard',
   onAfterAction: function () {
@@ -278,10 +277,10 @@ Template.anonymousCommentItemButtons.events({
     e.preventDefault();
     if (this.postId) {
       var id = this._id;
-      Router.go('anonymousCommentWideItem', {_id: id});
+      Router.go('anonymousComments', {_id: id});
     } else if (this.parentId) {
       var id = this.parentId;
-      Router.go('anonymousCommentWideItem', {_id: id});
+      Router.go('anonymousComments', {_id: id});
     }
   },
   'click .delete': function (e) {
@@ -334,23 +333,8 @@ Template.anonymousCommentInsertForm.events({
     if (!text) return;
     var postId = tmpl.data._id;
     var val = {text: text, postId: postId, parentId: null, userId: "anonymousUserId"};
-    swal({
-      title: "Preview",
-      text: text,
-      type: "info",
-      showCancelButton: true,
-      confirmButtonText: "Yes, submit it!",
-      cancelButtonText: "No, cancel plx!",
-      closeOnConfirm: true,
-    }, function (isConfirm) {
-      if (isConfirm) {
-        var id = Meteor.call('anonymousCommentSubmit', val,
-        function (error, result) {
-          Router.go('anonymousCommentWideItem', {_id: result});
-        });
-      } else {
-        tmpl.find('form').focus();
-      }
+    var id = Meteor.call('anonymousCommentSubmit', val, function (error, result) {
+      Router.go('anonymousComments', {_id: result});
     });
   }
 });
@@ -389,7 +373,7 @@ Template.postEditForm.events({
     topic = $.trim(topic);
     var id = this._id;
     var val = {title: title, text: text, topic: topic};
-    Meteor.call('postEditForm', id, val);
+    Meteor.call('postEdit', id, val);
     Router.go('singlePost', {_id: id});
   },
   'click .delete': function(e) {
