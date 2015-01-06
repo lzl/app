@@ -18,10 +18,10 @@ Router.onBeforeAction(function () {
   if (isAdmin()) {
     this.next();
   } else {
-    this.render('login');
+    this.render('loginPanel');
   }
 }, {
-  only: ['dashboard', 'postEdit']
+  only: ['dashboard', 'postEditForm']
 });
 
 Router.route('/', function () {
@@ -51,7 +51,7 @@ Router.route('/t/:topic', function () {
 
 Router.route('/p/:_id', function () {
   this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('cardForSinglePost', {
+  this.render('postPanelForSinglePost', {
     data: function () {
       return Posts.findOne(this.params._id);
     }
@@ -69,13 +69,13 @@ Router.route('/p/:_id', function () {
 
 Router.route('/p/:_id/edit', function () {
   this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postEdit', {
+  this.render('postEditForm', {
     data: function () {
       return Posts.findOne(this.params._id);
     }
   });
 }, {
-  name: 'postEdit',
+  name: 'postEditForm',
   onAfterAction: function () {
     var post = Posts.findOne({
       _id: this.params._id
@@ -86,13 +86,13 @@ Router.route('/p/:_id/edit', function () {
 
 Router.route('/c/:_id', function () {
   this.wait([
-    subs.subscribe('singleAnonymousComment', this.params._id),
-    subs.subscribe('singleAnonymousCommentChildren', this.params._id)
+    subs.subscribe('anonymousCommentItem', this.params._id),
+    subs.subscribe('anonymousCommentItemChildren', this.params._id)
     ]);
     if (this.ready()) {
       var comment = AnonymousComments.findOne(this.params._id);
       subs.subscribe('singlePost', comment.postId);
-      this.render('cardForSingleAnonymousComment', {
+      this.render('anonymousCommentsPanelForChat', {
         data: function () {
           return {
             comment: AnonymousComments.findOne(this.params._id),
@@ -103,7 +103,7 @@ Router.route('/c/:_id', function () {
       scroll(0,0);
     }
 }, {
-  name: 'singleAnonymousComment',
+  name: 'anonymousCommentItem',
   onAfterAction: function () {
     document.title = 'Discussion - LZL';
   }
@@ -135,27 +135,27 @@ Template.registerHelper("timestamp", function (when) {
   }
 });
 
-Template.cardForSingleLog.rendered = function () {
+Template.logItem.rendered = function () {
   masonry();
 };
 
-Template.cardForSingleLog.destroyed = function () {
+Template.logItem.destroyed = function () {
   masonry();
 };
 
-Template.cardForPosts.rendered = function () {
+Template.postPanel.rendered = function () {
   masonry();
 };
 
-Template.cardForPosts.destroyed = function () {
+Template.postPanel.destroyed = function () {
   masonry();
 };
 
-Template.anonymousLog.rendered = function () {
+Template.anonymousLogItem.rendered = function () {
   masonry();
 };
 
-Template.anonymousLog.destroyed = function () {
+Template.anonymousLogItem.destroyed = function () {
   masonry();
 };
 
@@ -167,7 +167,7 @@ Template.anonymousComment.destroyed = function () {
   masonry();
 };
 
-Template.postEdit.rendered = function () {
+Template.postEditForm.rendered = function () {
   $('textarea').autosize();
 }
 
@@ -177,7 +177,7 @@ Template.navbar.helpers({
   }
 });
 
-Template.cardForLogs.helpers({
+Template.logsPanel.helpers({
   logs: function () {
     if (Router.current().route.getName() === "dashboard") {
       return Logs.find({}, {sort: {createdAt: -1}});
@@ -189,7 +189,7 @@ Template.cardForLogs.helpers({
   }
 });
 
-Template.cardForPosts.helpers({
+Template.postPanel.helpers({
   textTruncated: function () {
     // via http://stackoverflow.com/a/27207320
     return _.str.prune(this.text, 1000);
@@ -220,25 +220,25 @@ Template.topicPosts.helpers({
   }
 });
 
-Template.anonymousLogs.helpers({
+Template.anonymousLogsPanel.helpers({
   logs: function () {
     return AnonymousLogs.find({}, {sort: {createdAt: -1}});
   }
 });
 
-Template.anonymousComments.helpers({
+Template.anonymousCommentsPanel.helpers({
   comments: function () {
     return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
   }
 });
 
-Template.cardForSingleAnonymousComment.helpers({
+Template.anonymousCommentsPanelForChat.helpers({
   comments: function () {
     return AnonymousComments.find({parentId: this.comment._id}, {sort: {createdAt: 1}});
   }
 });
 
-Template.singleAnonymousComment.helpers({
+Template.anonymousCommentItem.helpers({
   isAdmin: function () {
     if (this.userId !== "anonymousUserId") {
       return "list-group-item-info";
@@ -267,7 +267,7 @@ Template.logSubmitForm.events({
   }
 });
 
-Template.cardForSingleLogButtons.events({
+Template.logItemButtons.events({
   'click .delete': function (e) {
     e.preventDefault();
     var id = this._id;
@@ -308,10 +308,10 @@ Template.anonymousCommentButtons.events({
     e.preventDefault();
     if (this.postId) {
       var id = this._id;
-      Router.go('singleAnonymousComment', {_id: id});
+      Router.go('anonymousCommentItem', {_id: id});
     } else if (this.parentId) {
       var id = this.parentId;
-      Router.go('singleAnonymousComment', {_id: id});
+      Router.go('anonymousCommentItem', {_id: id});
     }
   },
   'click .delete': function (e) {
@@ -337,7 +337,7 @@ Template.anonymousCommentButtons.events({
   }
 });
 
-Template.postForm.events({
+Template.postInsertForm.events({
   'keyup textarea': function () {
     $('textarea').autosize();
   },
@@ -356,7 +356,7 @@ Template.postForm.events({
   }
 });
 
-Template.anonymousLogForm.events({
+Template.anonymousLogSubmitForm.events({
   'submit form': function (e, tmpl) {
     e.preventDefault();
     var text = tmpl.find('[type=text]').value;
@@ -382,7 +382,7 @@ Template.anonymousLogForm.events({
   }
 });
 
-Template.anonymousCommentForm.events({
+Template.anonymousCommentSubmitForm.events({
   'submit form': function (e, tmpl) {
     e.preventDefault();
     var text = tmpl.find('[type=text]').value;
@@ -402,7 +402,7 @@ Template.anonymousCommentForm.events({
       if (isConfirm) {
         var id = Meteor.call('anonymousCommentSubmit', val,
         function (error, result) {
-          Router.go('singleAnonymousComment', {_id: result});
+          Router.go('anonymousCommentItem', {_id: result});
         });
       } else {
         tmpl.find('form').focus();
@@ -411,7 +411,7 @@ Template.anonymousCommentForm.events({
   }
 });
 
-Template.anonymousCommentFormForSingleAnonymousComment.events({
+Template.anonymousCommentSubmitFormForChat.events({
   'submit form': function (e, tmpl) {
     e.preventDefault();
     var text = tmpl.find('[type=text]').value;
@@ -431,7 +431,7 @@ Template.anonymousCommentFormForSingleAnonymousComment.events({
   }
 });
 
-Template.postEdit.events({
+Template.postEditForm.events({
   'keyup textarea': function () {
     $('textarea').autosize();
   },
@@ -445,7 +445,7 @@ Template.postEdit.events({
     topic = $.trim(topic);
     var id = this._id;
     var val = {title: title, text: text, topic: topic};
-    Meteor.call('postEdit', id, val);
+    Meteor.call('postEditForm', id, val);
     Router.go('singlePost', {_id: id});
   },
   'click .delete': function(e) {

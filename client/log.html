@@ -1,0 +1,53 @@
+<template name="logsPanel">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading full-width">
+          <h1 class="panel-title">What I Learned Today</h1>
+        </div>
+        <ul class="list-group">
+          {{#each logs}}
+          {{> logItem}}
+          {{/each}}
+          <li class="list-group-item">EOF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="logSubmitForm">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="What I learned today">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
+</template>
+
+<template name="logItem">
+  <li class="list-group-item no-margin">
+    {{#if isInRole 'admin'}}
+    {{> logItemButtons}}
+    {{/if}}
+    <span class="pull-right timestamp"><code>{{timestamp createdAt}}</code></span>
+    {{#markdown}}{{text}}{{/markdown}}
+  </li>
+</template>
+
+<template name="logItemButtons">
+  <button type="button" class="btn btn-default btn-xs pull-right delete">delete</button>
+</template>
+
+<template name="anonymousLogSubmitForm">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Tell me yours anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Preview</button>
+      </span>
+    </div>
+  </form>
+</template>

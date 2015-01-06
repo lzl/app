@@ -86,7 +86,7 @@ Meteor.methods({
     }
     return AnonymousLogs.remove(id);
   },
-  postEdit: function (id, val) {
+  postEditForm: function (id, val) {
     check(id, String);
     check(val, {
       title: String,
