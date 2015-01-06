@@ -8,6 +8,11 @@
   margin: 0;
 }
 
+.full-width {
+  display: table-cell;
+  width: 1%;
+}
+
 img {
   max-width: 100%;
 }

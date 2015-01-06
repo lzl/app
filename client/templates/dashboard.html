@@ -3,7 +3,6 @@
     <div id="masonry" class="row">
       {{> cardForLogs}}
       {{> postForm}}
-      {{> anonymousLogs}}
       {{> anonymousComments}}
     </div>
   </div>
@@ -58,7 +57,7 @@
   <div class="col-sm-6 col-md-4 col-lg-3">
     <div class="item">
       <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading full-width">
           <h2 class="panel-title">Comments</h2>
         </div>
         <ul class="list-group">
@@ -67,7 +66,6 @@
           {{/each}}
           <li class="list-group-item">EOF</li>
         </ul>
-        {{> diabledFooter}}
       </div>
     </div>
   </div>
@@ -91,7 +89,7 @@
   <div class="col-sm-6 col-md-4 col-lg-3">
     <div class="item">
       <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading full-width">
           <h2 class="panel-title">Compose</h2>
         </div>
         <div class="panel-body">
@@ -111,21 +109,7 @@
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
-        {{> diabledFooter}}
       </div>
     </div>
-  </div>
-</template>
-
-<template name="diabledFooter">
-  <div class="panel-footer">
-    <form role="form">
-      <div class="input-group">
-        <input type="text" class="form-control" disabled>
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="submit" disabled="disabled">:D</button>
-        </span>
-      </div>
-    </form>
   </div>
 </template>
