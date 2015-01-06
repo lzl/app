@@ -1,0 +1,96 @@
+<template name="anonymousCommentsPanel">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading full-width">
+          <h2 class="panel-title">Comments</h2>
+        </div>
+        <ul class="list-group">
+          {{#each comments}}
+          {{> anonymousCommentItem}}
+          {{/each}}
+          <li class="list-group-item">EOF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="anonymousCommentItem">
+  <li class="list-group-item">
+    {{> anonymousCommentItemButtons}}
+    {{text}}
+  </li>
+</template>
+
+<template name="anonymousCommentItemButtons">
+  <div class="btn-group btn-group-xs pull-right" role="group">
+    <button type="button" class="btn btn-default link">link</button>
+    <button type="button" class="btn btn-default delete">delete</button>
+  </div>
+</template>
+
+<template name="anonymousCommentInsertForm">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Ask anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
+</template>
+
+<template name="anonymousCommentsWidePanel">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8 col-md-offset-2">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            Bookmark this page to receive my future reply.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class=" panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Discussion: <a href="/p/{{post._id}}">{{post.title}}</a></h1>
+          </div>
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="pull-right timestamp"><code>{{dateTime comment.createdAt}}</code></span>
+              {{comment.text}}
+            </li>
+            {{#each comments}}
+            {{> anonymousCommentWideItem}}
+            {{/each}}
+          </ul>
+          <div class="panel-footer">
+            {{> anonymousCommentInsertWideForm}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="anonymousCommentWideItem">
+  <li class="list-group-item {{isAdmin}}">
+    <span class="pull-right timestamp"><code>{{dateTime createdAt}}</code></span>
+    {{text}}
+  </li>
+</template>
+
+<template name="anonymousCommentInsertWideForm">
+  <form role="form">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Chat anonymously">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Submit</button>
+      </span>
+    </div>
+  </form>
+</template>
