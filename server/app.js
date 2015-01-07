@@ -2,22 +2,6 @@
 // Roles.createRole("admin");
 // Roles.addUsersToRoles(id, "admin");
 
-FastRender.route('/', function () {
-  this.subscribe('mainPosts');
-  this.subscribe('otherPosts');
-  this.subscribe('limitedLogs', 1);
-});
-FastRender.route('/t/:topic', function (params) {
-  this.subscribe('topicPosts', params.topic);
-});
-FastRender.route('/p/:_id', function (params) {
-  this.subscribe('singlePost', params._id);
-});
-FastRender.route('/c/:_id', function (params) {
-  this.subscribe('anonymousCommentAndPost', params._id);
-  this.subscribe('anonymousCommentChildren', params._id);
-});
-
 Meteor.publish('limitedLogs', function (limit) {
   check(limit, Number);
   var date = new Date();

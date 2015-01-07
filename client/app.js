@@ -8,119 +8,6 @@ var masonry = function () {
   });
 };
 
-var capitaliseFirstLetter = function (string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-var subs = new SubsManager();
-
-Router.onBeforeAction(function () {
-  if (isAdmin()) {
-    this.next();
-  } else {
-    this.render('loginPanel');
-  }
-}, {
-  only: ['dashboard', 'postEditForm']
-});
-
-Router.route('/', function () {
-  this.wait([subs.subscribe('mainPosts'), subs.subscribe('otherPosts'), subs.subscribe('limitedLogs', 1)]);
-  this.render('allPosts');
-}, {
-  name: 'allPosts',
-  onAfterAction: function () {
-    document.title = 'LZL';
-  }
-});
-
-Router.route('/t/:topic', function () {
-  var topic = this.params.topic;
-  Session.set('topic', topic);
-  this.wait(subs.subscribe('topicPosts', topic));
-  this.render('topicPosts');
-  scroll(0,0);
-}, {
-  name:'topicPosts',
-  onAfterAction: function () {
-    var topic = this.params.topic;
-    topic = capitaliseFirstLetter(topic);
-    document.title = topic + ' - LZL';
-  }
-});
-
-Router.route('/p/:_id', function () {
-  this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postWidePanel', {
-    data: function () {
-      return Posts.findOne(this.params._id);
-    }
-  });
-  scroll(0,0);
-}, {
-  name: 'singlePost',
-  onAfterAction: function () {
-    var post = Posts.findOne({
-      _id: this.params._id
-    });
-    document.title = post.title + ' - LZL';
-  }
-});
-
-Router.route('/p/:_id/edit', function () {
-  this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postEditForm', {
-    data: function () {
-      return Posts.findOne(this.params._id);
-    }
-  });
-}, {
-  name: 'postEditForm',
-  onAfterAction: function () {
-    var post = Posts.findOne({
-      _id: this.params._id
-    });
-    document.title = post.title + ' - LZL';
-  }
-});
-
-Router.route('/c/:_id', function () {
-  this.wait([
-    subs.subscribe('anonymousCommentAndPost', this.params._id),
-    subs.subscribe('anonymousCommentChildren', this.params._id)
-  ]);
-  if (this.ready()) {
-    var comment = AnonymousComments.findOne(this.params._id);
-    this.render('anonymousCommentsWidePanel', {
-      data: function () {
-        return {
-          comment: comment,
-          post: Posts.findOne(comment.postId)
-        };
-      }
-    });
-    scroll(0,0);
-  }
-}, {
-  name: 'anonymousComments',
-  onAfterAction: function () {
-    document.title = 'Discussion - LZL';
-  }
-});
-
-Router.route('/dashboard', function () {
-  this.wait([
-    subs.subscribe('limitedLogs', 7),
-    subs.subscribe('allAnonymousComments')
-  ]);
-  this.render('dashboard');
-  }, {
-  name: 'dashboard',
-  onAfterAction: function () {
-    document.title = 'Dashboard - LZL';
-  }
-});
-
 Template.registerHelper("dateTime", function (when) {
   if (when) {
     return moment(when).calendar();
@@ -206,7 +93,7 @@ Template.topicPosts.helpers({
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
   },
   topic: function () {
-    return Session.get('topic');
+    return Router.current().params.topic;
   }
 });
 

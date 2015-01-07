@@ -2,16 +2,6 @@ Posts = new Mongo.Collection('posts');
 Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
 
-Router.configure({
-  layoutTemplate: 'appBody'
-});
-
-isAdmin = function () {
-  var user = Meteor.user();
-  var isAdmin = Roles.userIsInRole(user, 'admin');
-  return isAdmin;
-};
-
 Meteor.methods({
   logSubmit: function (val) {
     check(val, String);
