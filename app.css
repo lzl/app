@@ -18,6 +18,7 @@ img {
 }
 
 code {
+  background-color: transparent;
   -ms-word-break: break-all;
 
        /* Be VERY careful with this, breaks normal words wh_erever */
@@ -29,9 +30,4 @@ code {
   -webkit-hyphens: auto;
      -moz-hyphens: auto;
           hyphens: auto;
-}
-
-.timestamp code {
-  font-size: 80%;
-  color: #333;
 }
