@@ -48,11 +48,28 @@ Template.postEditForm.rendered = function () {
   $('textarea').autosize();
 }
 
+// Meteor.status BEGINS
+// learn from https://github.com/nate-strauser/meteor-connection-banner
+Session.setDefault('wasConnected', false);
+Session.setDefault('isConnected', true);
+
 Template.navbar.helpers({
-  offline: function () {
-    return Meteor.status().connected;
+  wasConnected: function () {
+    return Session.equals('wasConnected', true);
+  },
+  isDisconnected: function () {
+    return Session.equals('isConnected', false);
   }
 });
+
+Tracker.autorun(function () {
+  var isConnected = Meteor.status().connected;
+  if (isConnected) {
+    Session.set('wasConnected', true);
+  }
+  Session.set('isConnected', isConnected);
+});
+// Meteor.status ENDS
 
 Template.logsPanel.helpers({
   logs: function () {
