@@ -49,7 +49,7 @@ Template.postEditForm.rendered = function () {
 }
 
 // Meteor.status BEGINS
-// learn from https://github.com/nate-strauser/meteor-connection-banner
+// via https://github.com/nate-strauser/meteor-connection-banner
 Session.setDefault('wasConnected', false);
 Session.setDefault('isConnected', true);
 
@@ -137,7 +137,7 @@ Template.anonymousCommentWideItem.helpers({
 });
 
 Template.navbar.events({
-  'click .reconnect': function (e) {
+  'click [data-action=reconnect]': function (e) {
     e.preventDefault();
     Meteor.reconnect();
   }
@@ -159,7 +159,7 @@ Template.logInsertForm.events({
 });
 
 Template.logItemButtons.events({
-  'click .delete': function (e) {
+  'click [data-action=remove]': function (e) {
     e.preventDefault();
     var id = this._id;
     swal({
@@ -177,7 +177,7 @@ Template.logItemButtons.events({
 });
 
 Template.anonymousCommentItemButtons.events({
-  'click .link': function (e) {
+  'click [data-action=go]': function (e) {
     e.preventDefault();
     if (this.postId) {
       var id = this._id;
@@ -187,7 +187,7 @@ Template.anonymousCommentItemButtons.events({
       Router.go('anonymousComments', {_id: id});
     }
   },
-  'click .delete': function (e) {
+  'click [data-action=remove]': function (e) {
     e.preventDefault();
     var id = this._id;
     if (this.postId) {
@@ -280,7 +280,9 @@ Template.postEditForm.events({
     Meteor.call('postEdit', id, val);
     Router.go('singlePost', {_id: id});
   },
-  'click .delete': function(e) {
+  // [data-action=remove]
+  // via http://bit.ly/1Ko0LtP by Nick Wientge
+  'click [data-action=remove]': function(e) {
     e.preventDefault();
     var id = this._id;
     swal({

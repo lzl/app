@@ -25,7 +25,7 @@
         <li class="{{isActivePath regex='meteor'}}"><a href="/t/meteor">Meteor</a></li>
         {{#if wasConnected}}
           {{#if isDisconnected}}
-            <li><button type="button" class="btn btn-link navbar-btn reconnect">Click to reconnect</button></li>
+            <li><button type="button" class="btn btn-link navbar-btn" data-action="reconnect">Click to reconnect</button></li>
           {{/if}}
         {{/if}}
       </ul>
