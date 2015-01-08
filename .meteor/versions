@@ -37,11 +37,13 @@ iron:url@1.0.6
 jquery@1.0.2
 json@1.0.2
 launch-screen@1.0.1
+less@1.0.12
 livedata@1.0.12
 lizunlong:sweetalert@0.3.2
 localstorage@1.0.2
 logging@1.0.6
 markdown@1.0.3
+matteodem:easy-search@1.4.5
 meteor@1.1.4
 meteor-platform@1.2.1
 meteorhacks:fast-render@2.1.6
@@ -73,6 +75,7 @@ simple:highlight.js@1.0.9
 spacebars@1.0.4
 spacebars-compiler@1.0.4
 srp@1.0.2
+standard-app-packages@1.0.4
 stylus@1.0.6
 templating@1.0.10
 tracker@1.0.4

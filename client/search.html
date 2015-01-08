@@ -1,0 +1,42 @@
+<template name="searchInput">
+  {{> esInput index="posts" class="form-control" placeholder="Type to search" }}
+</template>
+
+<template name="searchResult">
+  <div class="container-fluid">
+    {{#ifEsInputIsEmpty index="posts"}}
+    <div class="row">
+      <div class="col-sm-12 visible-xs-block">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            Search is an important feature.
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/ifEsInputIsEmpty}}
+
+    {{#ifEsIsSearching index="posts"}}
+      {{> spinner}}
+    {{/ifEsIsSearching}}
+
+    {{#ifEsHasNoResults index="posts"}}
+    <div class="row">
+      <div class="col-sm-12 visible-xs-block">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            No results found!
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/ifEsHasNoResults}}
+
+    <div id="masonry" class="row">
+      {{#esEach index="posts"}}
+      {{> postPanel}}
+      {{/esEach}}
+    </div>
+    {{> esPagination index="posts" class="pagination"}}
+  </div>
+</template>
