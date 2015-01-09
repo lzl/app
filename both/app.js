@@ -8,7 +8,16 @@ EasySearch.createSearchIndex('posts', {
   'use': 'mongo-db',
   'sort': function() {
     return { 'createdAt': -1 };
-  },
+  }
+});
+
+EasySearch.createSearchIndex('logs', {
+  'collection': Logs,
+  'field': ['text'],
+  'use': 'mongo-db',
+  'sort': function() {
+    return { 'createdAt': -1 };
+  }
 });
 
 Meteor.methods({

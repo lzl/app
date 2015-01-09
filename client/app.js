@@ -142,6 +142,18 @@ Template.anonymousCommentWideItem.helpers({
   }
 });
 
+Template.searchInput.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
+  }
+});
+
+Template.searchResult.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
+  }
+});
+
 Template.navbar.events({
   'click [data-action=reconnect]': function (e) {
     e.preventDefault();
