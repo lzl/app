@@ -4,17 +4,15 @@
 
 <template name="searchResult">
   <div class="container-fluid">
-    {{#ifEsInputIsEmpty index="posts"}}
-    <div class="row">
+    <div class="row visible-xs">
       <div class="col-sm-8 col-md-offset-2">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            Search is an important feature.
+        <form role="search">
+          <div class="form-group">
+            {{> searchInput}}
           </div>
-        </div>
+        </form>
       </div>
     </div>
-    {{/ifEsInputIsEmpty}}
 
     {{#ifEsIsSearching index="posts"}}
       {{> spinner}}
@@ -37,6 +35,5 @@
       {{> postPanel}}
       {{/esEach}}
     </div>
-    {{> esPagination index="posts" class="pagination"}}
   </div>
 </template>
