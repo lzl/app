@@ -20,6 +20,12 @@ Template.registerHelper("timestamp", function (when) {
   }
 });
 
+Template.registerHelper("isRouter", function (name) {
+  if (name) {
+    return Router.current().route.getName() === "searchResult";
+  }
+});
+
 Template.logItem.rendered = function () {
   masonry();
 };

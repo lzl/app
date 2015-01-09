@@ -29,11 +29,14 @@
           {{/if}}
         {{/if}}
       </ul>
+
+      {{#if isRouter 'searchResult'}}
       <form class="navbar-form navbar-left hidden-xs" role="search">
         <div class="form-group">
           {{> searchInput}}
         </div>
       </form>
+      {{/if}}
     </div>
   </nav>
 </template>
