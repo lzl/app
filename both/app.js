@@ -2,6 +2,24 @@ Posts = new Mongo.Collection('posts');
 Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
 
+EasySearch.createSearchIndex('posts', {
+  'collection': Posts,
+  'field': ['title', 'text', 'topic'],
+  'use': 'mongo-db',
+  'sort': function() {
+    return { 'createdAt': -1 };
+  }
+});
+
+EasySearch.createSearchIndex('logs', {
+  'collection': Logs,
+  'field': ['text'],
+  'use': 'mongo-db',
+  'sort': function() {
+    return { 'createdAt': -1 };
+  }
+});
+
 Meteor.methods({
   logSubmit: function (val) {
     check(val, String);

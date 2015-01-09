@@ -20,6 +20,12 @@ Template.registerHelper("timestamp", function (when) {
   }
 });
 
+Template.registerHelper("isRouter", function (name) {
+  if (name) {
+    return Router.current().route.getName() === name;
+  }
+});
+
 Template.logItem.rendered = function () {
   masonry();
 };
@@ -133,6 +139,18 @@ Template.anonymousCommentWideItem.helpers({
     } else {
       return;
     }
+  }
+});
+
+Template.searchInput.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
+  }
+});
+
+Template.searchResult.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
   }
 });
 
