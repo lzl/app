@@ -1,11 +1,16 @@
 <template name="dashboard">
   <div class="container-fluid">
-    <div id="masonry" class="row">
-      {{> logInsertForm}}
-      {{> logsPanel}}
-      {{> postInsertForm}}
-      {{> anonymousCommentsPanel}}
-    </div>
+    {{> searchInputMobile}}
+    {{#ifEsInputIsEmpty index="posts"}}
+      <div id="masonry" class="row">
+        {{> logInsertForm}}
+        {{> logsPanel}}
+        {{> postInsertForm}}
+        {{> anonymousCommentsPanel}}
+      </div>
+    {{else}}
+      {{> searchResult}}
+    {{/ifEsInputIsEmpty}}
   </div>
 </template>
 
@@ -21,5 +26,45 @@
         </div>
       </div>
     </div>
+  </div>
+</template>
+
+<template name="searchInput">
+  {{> esInput index="posts" class="form-control" placeholder="Type to search" }}
+</template>
+
+<template name="searchInputMobile">
+  <div class="row visible-xs">
+    <div class="col-sm-8 col-md-offset-2">
+      <form role="search">
+        <div class="form-group">
+          {{> searchInput}}
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<template name="searchResult">
+  {{#ifEsIsSearching index="posts"}}
+    {{> spinner}}
+  {{/ifEsIsSearching}}
+
+  {{#ifEsHasNoResults index="posts"}}
+  <div class="row">
+    <div class="col-sm-8 col-md-offset-2">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          No results found!
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/ifEsHasNoResults}}
+
+  <div id="masonry" class="row">
+    {{#esEach index="posts"}}
+      {{> postPanel}}
+    {{/esEach}}
   </div>
 </template>
