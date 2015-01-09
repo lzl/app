@@ -1,11 +1,17 @@
 <template name="dashboard">
   <div class="container-fluid">
-    <div id="masonry" class="row">
-      {{> logsPanel}}
-      {{> logInsertForm}}
-      {{> postInsertForm}}
-      {{> anonymousCommentsPanel}}
-    </div>
+    {{> searchInputMobile}}
+
+    {{#ifEsInputIsEmpty index="posts"}}
+      <div id="masonry" class="row">
+        {{> logInsertForm}}
+        {{> logsPanel}}
+        {{> postInsertForm}}
+        {{> anonymousCommentsPanel}}
+      </div>
+    {{else}}
+      {{> searchResult}}
+    {{/ifEsInputIsEmpty}}
   </div>
 </template>
 
@@ -19,6 +25,73 @@
           </div>
           <div class="panel-body">{{> loginButtons}}</div>
         </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="searchInput">
+  {{> esInput index=indexes class="form-control" placeholder="Type to search" }}
+</template>
+
+<template name="searchInputMobile">
+  <div class="row visible-xs">
+    <div class="col-sm-8 col-md-offset-2">
+      <form role="search">
+        <div class="form-group">
+          {{> searchInput}}
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<template name="searchResult">
+  {{#ifEsIsSearching index="posts"}}
+    {{> spinner}}
+  {{/ifEsIsSearching}}
+
+  {{#ifEsHasNoResults index=indexes}}
+    <div class="row">
+      <div class="col-sm-8 col-md-offset-2">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            No results found!
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/ifEsHasNoResults}}
+
+  <div id="masonry" class="row">
+    {{#ifEsHasNoResults index="logs"}}
+    {{else}}
+      {{> logSearchResult}}
+    {{/ifEsHasNoResults}}
+    
+    {{> postSearchResult}}
+  </div>
+</template>
+
+<template name="postSearchResult">
+  {{#esEach index="posts"}}
+    {{> postPanel}}
+  {{/esEach}}
+</template>
+
+<template name="logSearchResult">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="item">
+      <div class="panel panel-default">
+        <div class="panel-heading full-width">
+          <h1 class="panel-title">What I Learned Today</h1>
+        </div>
+        <ul class="list-group">
+          {{#esEach index="logs"}}
+            {{> logItem}}
+          {{/esEach}}
+        </ul>
+        {{> esPagination index="logs"}}
       </div>
     </div>
   </div>

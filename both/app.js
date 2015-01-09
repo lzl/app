@@ -2,15 +2,23 @@ Posts = new Mongo.Collection('posts');
 Logs = new Mongo.Collection('logs');
 AnonymousComments = new Mongo.Collection('anonymousComments');
 
-Router.configure({
-  layoutTemplate: 'appBody'
+EasySearch.createSearchIndex('posts', {
+  'collection': Posts,
+  'field': ['title', 'text', 'topic'],
+  'use': 'mongo-db',
+  'sort': function() {
+    return { 'createdAt': -1 };
+  }
 });
 
-isAdmin = function () {
-  var user = Meteor.user();
-  var isAdmin = Roles.userIsInRole(user, 'admin');
-  return isAdmin;
-};
+EasySearch.createSearchIndex('logs', {
+  'collection': Logs,
+  'field': ['text'],
+  'use': 'mongo-db',
+  'sort': function() {
+    return { 'createdAt': -1 };
+  }
+});
 
 Meteor.methods({
   logSubmit: function (val) {

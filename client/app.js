@@ -8,119 +8,6 @@ var masonry = function () {
   });
 };
 
-var capitaliseFirstLetter = function (string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-var subs = new SubsManager();
-
-Router.onBeforeAction(function () {
-  if (isAdmin()) {
-    this.next();
-  } else {
-    this.render('loginPanel');
-  }
-}, {
-  only: ['dashboard', 'postEditForm']
-});
-
-Router.route('/', function () {
-  this.wait([subs.subscribe('mainPosts'), subs.subscribe('otherPosts'), subs.subscribe('limitedLogs', 1)]);
-  this.render('allPosts');
-}, {
-  name: 'allPosts',
-  onAfterAction: function () {
-    document.title = 'LZL';
-  }
-});
-
-Router.route('/t/:topic', function () {
-  var topic = this.params.topic;
-  Session.set('topic', topic);
-  this.wait(subs.subscribe('topicPosts', topic));
-  this.render('topicPosts');
-  scroll(0,0);
-}, {
-  name:'topicPosts',
-  onAfterAction: function () {
-    var topic = this.params.topic;
-    topic = capitaliseFirstLetter(topic);
-    document.title = topic + ' - LZL';
-  }
-});
-
-Router.route('/p/:_id', function () {
-  this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postWidePanel', {
-    data: function () {
-      return Posts.findOne(this.params._id);
-    }
-  });
-  scroll(0,0);
-}, {
-  name: 'singlePost',
-  onAfterAction: function () {
-    var post = Posts.findOne({
-      _id: this.params._id
-    });
-    document.title = post.title + ' - LZL';
-  }
-});
-
-Router.route('/p/:_id/edit', function () {
-  this.wait(subs.subscribe('singlePost', this.params._id));
-  this.render('postEditForm', {
-    data: function () {
-      return Posts.findOne(this.params._id);
-    }
-  });
-}, {
-  name: 'postEditForm',
-  onAfterAction: function () {
-    var post = Posts.findOne({
-      _id: this.params._id
-    });
-    document.title = post.title + ' - LZL';
-  }
-});
-
-Router.route('/c/:_id', function () {
-  this.wait([
-    subs.subscribe('anonymousCommentAndPost', this.params._id),
-    subs.subscribe('anonymousCommentChildren', this.params._id)
-  ]);
-  if (this.ready()) {
-    var comment = AnonymousComments.findOne(this.params._id);
-    this.render('anonymousCommentsWidePanel', {
-      data: function () {
-        return {
-          comment: comment,
-          post: Posts.findOne(comment.postId)
-        };
-      }
-    });
-    scroll(0,0);
-  }
-}, {
-  name: 'anonymousComments',
-  onAfterAction: function () {
-    document.title = 'Discussion - LZL';
-  }
-});
-
-Router.route('/dashboard', function () {
-  this.wait([
-    subs.subscribe('limitedLogs', 7),
-    subs.subscribe('allAnonymousComments')
-  ]);
-  this.render('dashboard');
-  }, {
-  name: 'dashboard',
-  onAfterAction: function () {
-    document.title = 'Dashboard - LZL';
-  }
-});
-
 Template.registerHelper("dateTime", function (when) {
   if (when) {
     return moment(when).calendar();
@@ -130,6 +17,12 @@ Template.registerHelper("dateTime", function (when) {
 Template.registerHelper("timestamp", function (when) {
   if (when) {
     return moment(when).format('HH:mm');
+  }
+});
+
+Template.registerHelper("isRouter", function (name) {
+  if (name) {
+    return Router.current().route.getName() === name;
   }
 });
 
@@ -161,11 +54,28 @@ Template.postEditForm.rendered = function () {
   $('textarea').autosize();
 }
 
+// Meteor.status BEGINS
+// via https://github.com/nate-strauser/meteor-connection-banner
+Session.setDefault('wasConnected', false);
+Session.setDefault('isConnected', true);
+
 Template.navbar.helpers({
-  offline: function () {
-    return Meteor.status().connected;
+  wasConnected: function () {
+    return Session.equals('wasConnected', true);
+  },
+  isDisconnected: function () {
+    return Session.equals('isConnected', false);
   }
 });
+
+Tracker.autorun(function () {
+  var isConnected = Meteor.status().connected;
+  if (isConnected) {
+    Session.set('wasConnected', true);
+  }
+  Session.set('isConnected', isConnected);
+});
+// Meteor.status ENDS
 
 Template.logsPanel.helpers({
   logs: function () {
@@ -206,7 +116,7 @@ Template.topicPosts.helpers({
     return Posts.find({topic: topic}, {sort: {createdAt: -1}});
   },
   topic: function () {
-    return Session.get('topic');
+    return Router.current().params.topic;
   }
 });
 
@@ -232,8 +142,20 @@ Template.anonymousCommentWideItem.helpers({
   }
 });
 
+Template.searchInput.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
+  }
+});
+
+Template.searchResult.helpers({
+  indexes: function () {
+    return ['logs', 'posts'];
+  }
+});
+
 Template.navbar.events({
-  'click .reconnect': function (e) {
+  'click [data-action=reconnect]': function (e) {
     e.preventDefault();
     Meteor.reconnect();
   }
@@ -255,7 +177,7 @@ Template.logInsertForm.events({
 });
 
 Template.logItemButtons.events({
-  'click .delete': function (e) {
+  'click [data-action=remove]': function (e) {
     e.preventDefault();
     var id = this._id;
     swal({
@@ -273,7 +195,7 @@ Template.logItemButtons.events({
 });
 
 Template.anonymousCommentItemButtons.events({
-  'click .link': function (e) {
+  'click [data-action=go]': function (e) {
     e.preventDefault();
     if (this.postId) {
       var id = this._id;
@@ -283,7 +205,7 @@ Template.anonymousCommentItemButtons.events({
       Router.go('anonymousComments', {_id: id});
     }
   },
-  'click .delete': function (e) {
+  'click [data-action=remove]': function (e) {
     e.preventDefault();
     var id = this._id;
     if (this.postId) {
@@ -376,7 +298,9 @@ Template.postEditForm.events({
     Meteor.call('postEdit', id, val);
     Router.go('singlePost', {_id: id});
   },
-  'click .delete': function(e) {
+  // [data-action=remove]
+  // via http://bit.ly/1Ko0LtP by Nick Wientge
+  'click [data-action=remove]': function(e) {
     e.preventDefault();
     var id = this._id;
     swal({
