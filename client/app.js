@@ -27,12 +27,12 @@ Template.registerHelper("isRouter", function (name) {
 });
 
 // This is an ugly hack
+Session.setDefault('logText', "");
 Template.logInsertForm.rendered = function () {
   this.autorun(function () {
-    if (Session.get('logText') || true) {
-      masonry();
-      console.log("Masonrified.");
-    }
+    var logText = Session.get('logText');
+    masonry();
+    console.log("Masonrified.");
   });
 };
 // Ugly hack ends
