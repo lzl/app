@@ -97,6 +97,9 @@ Template.logsPanel.helpers({
       date.setDate(date.getDate() - 1);
       return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
     }
+  },
+  preview: function () {
+    return Session.get('logText');
   }
 });
 

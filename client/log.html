@@ -6,9 +6,16 @@
           <h1 class="panel-title">What I Learned Today</h1>
         </div>
         <ul class="list-group">
+          {{#if preview}}
+            <li class="list-group-item no-margin">
+              {{#markdown}}{{preview}}{{/markdown}}
+            </li>
+          {{/if}}
+
           {{#each logs}}
             {{> logItem}}
           {{/each}}
+
           <li class="list-group-item">EOF</li>
         </ul>
       </div>
