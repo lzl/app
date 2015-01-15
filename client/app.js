@@ -187,6 +187,7 @@ Template.logInsertForm.events({
     text = $.trim(text);
     if (!text) return;
     Meteor.call('logSubmit', text);
+    Session.set('logText', "");
     tmpl.find('form').reset();
     tmpl.find('form').focus();
   }
