@@ -26,6 +26,17 @@ Template.registerHelper("isRouter", function (name) {
   }
 });
 
+// This is an ugly hack
+Template.logInsertForm.rendered = function () {
+  this.autorun(function () {
+    if (Session.get('logText') || true) {
+      masonry();
+      console.log("Masonrified.");
+    }
+  });
+};
+// Ugly hack ends
+
 Template.logItem.rendered = function () {
   masonry();
 };
@@ -162,8 +173,10 @@ Template.navbar.events({
 });
 
 Template.logInsertForm.events({
-  'keyup textarea': function () {
+  'keyup textarea': function (e, tmpl) {
     $('textarea').autosize();
+    var text = tmpl.find('#logText').value;
+    Session.set('logText', text);
   },
   'submit form': function (e, tmpl) {
     e.preventDefault();
