@@ -2,11 +2,15 @@
 // Roles.createRole("admin");
 // Roles.addUsersToRoles(id, "admin");
 
+// Meteor.publish('limitedLogs', function (limit) {
+//   check(limit, Number);
+//   var date = new Date();
+//   date.setDate(date.getDate() - limit);
+//   return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+// });
 Meteor.publish('limitedLogs', function (limit) {
   check(limit, Number);
-  var date = new Date();
-  date.setDate(date.getDate() - limit);
-  return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+  return Logs.find({}, {sort: {createdAt: -1}, limit: limit});
 });
 // Meteor.publish('allPosts', function () {
 //   return Posts.find({}, {sort: {createdAt: -1}});

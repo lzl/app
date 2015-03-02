@@ -3,7 +3,7 @@
     <div class="item">
       <div class="panel panel-default">
         <div class="panel-heading full-width">
-          <h1 class="panel-title">What I Learned Today</h1>
+          <h1 class="panel-title">What I Learned <s>Today</s> These Days</h1>
         </div>
         <ul class="list-group">
           {{#if preview}}
@@ -16,7 +16,10 @@
             {{> logItem}}
           {{/each}}
 
-          <li class="list-group-item">EOF</li>
+          <li class="list-group-item">
+            EOF
+            <button type="button" class="btn btn-default btn-xs pull-right" data-action="more">load more</button>
+          </li>
         </ul>
       </div>
     </div>
@@ -28,7 +31,7 @@
     {{#if isInRole 'admin'}}
       {{> logItemButtons}}
     {{/if}}
-    <span class="pull-right timestamp"><code>{{timestamp createdAt}}</code></span>
+    <!-- <span class="pull-right timestamp"><code>{{timestamp createdAt}}</code></span> -->
     {{#markdown}}{{text}}{{/markdown}}
   </li>
 </template>

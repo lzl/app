@@ -69,6 +69,7 @@ Template.postEditForm.rendered = function () {
 // via https://github.com/nate-strauser/meteor-connection-banner
 Session.setDefault('wasConnected', false);
 Session.setDefault('isConnected', true);
+Session.setDefault('logMore', 10);
 
 Template.navbar.helpers({
   wasConnected: function () {
@@ -89,18 +90,25 @@ Tracker.autorun(function () {
 // Meteor.status ENDS
 
 Template.logsPanel.helpers({
+  // logs: function () {
+  //   if (Router.current().route.getName() === "dashboard") {
+  //     return Logs.find({}, {sort: {createdAt: -1}});
+  //   } else {
+  //     var date = new Date();
+  //     date.setDate(date.getDate() - Session.get('logMore'));
+  //     return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
+  //   }
+  // },
   logs: function () {
-    if (Router.current().route.getName() === "dashboard") {
-      return Logs.find({}, {sort: {createdAt: -1}});
-    } else {
-      var date = new Date();
-      date.setDate(date.getDate() - 1);
-      return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
-    }
+    return Logs.find({}, {sort: {createdAt: -1}});
   },
   preview: function () {
     return Session.get('logText');
   }
+});
+
+Tracker.autorun(function () {
+  Meteor.subscribe('limitedLogs', Session.get('logMore'));
 });
 
 Template.postPanel.helpers({
@@ -190,6 +198,13 @@ Template.logInsertForm.events({
     Session.set('logText', "");
     tmpl.find('form').reset();
     tmpl.find('form').focus();
+  }
+});
+
+Template.logsPanel.events({
+  'click [data-action=more]': function (e) {
+    e.preventDefault();
+    Session.set('logMore', Session.get('logMore') + 10);
   }
 });
 
