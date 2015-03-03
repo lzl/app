@@ -111,6 +111,12 @@ Tracker.autorun(function () {
   Meteor.subscribe('limitedLogs', Session.get('logMore'));
 });
 
+Template.logInsertForm.helpers({
+  logText: function() {
+    return Session.get('logText');
+  }
+});
+
 Template.postPanel.helpers({
   textTruncated: function () {
     // via http://stackoverflow.com/a/27207320
@@ -223,6 +229,10 @@ Template.logItemButtons.events({
     }, function () {
       Meteor.call('logRemove', id);
     });
+  },
+  'click [data-action=fork]': function (e) {
+    e.preventDefault();
+    Session.set('logText', this.text);
   }
 });
 
