@@ -37,7 +37,10 @@
 </template>
 
 <template name="logItemButtons">
-  <button type="button" class="btn btn-default btn-xs pull-right" data-action="remove">delete</button>
+  <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
+    <button type="button" class="btn btn-default" data-action="fork">copy</button>
+    <button type="button" class="btn btn-default" data-action="remove">delete</button>
+  </div>
 </template>
 
 <template name="logInsertForm">
@@ -50,7 +53,7 @@
         <div class="panel-body">
           <form role="form">
             <div class="form-group">
-              <textarea type="text" class="form-control" id="logText" rows="5"></textarea>
+              <textarea type="text" class="form-control" id="logText" rows="5">{{logText}}</textarea>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
