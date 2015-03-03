@@ -37,6 +37,12 @@ Template.logInsertForm.rendered = function () {
 };
 // Ugly hack ends
 
+Template.logInsertForm.destroyed = function () {
+  Meteor.setTimeout(function () {
+    masonry();
+  }, 100)
+};
+
 Template.logItem.rendered = function () {
   masonry();
 };
