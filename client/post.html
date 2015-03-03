@@ -58,7 +58,11 @@
           </div>
           <div class="panel-body">{{#markdown}}{{text}}{{/markdown}}</div>
           <div class="panel-footer">
-            <span class="timestamp"><code>{{dateTime createdAt}}</code></span>
+          {{#if hasModifiedDate}}
+            <span class="timestamp"><code>Last modified @ {{dateTime modifiedAt}}</code></span>
+          {{else}}
+            <span class="timestamp"><code>Published @ {{dateTime createdAt}}</code></span>
+          {{/if}}
             <span class="pull-right">
               <a href="{{pathFor route='topicPosts'}}">{{topic}}</a>
               {{#if isInRole 'admin'}}
@@ -125,6 +129,11 @@
               <div class="form-group">
                 <label for="text">Topic</label>
                 <input type="text" class="form-control" id="topic" value="{{topic}}">
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="doLog"> Submit a update log?
+                </label>
               </div>
               <button type="submit" class="btn btn-primary">Submit</button>
               <button class="btn btn-link" data-action="remove">Delete post</button>

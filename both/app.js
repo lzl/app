@@ -61,7 +61,7 @@ Meteor.methods({
     var autoLog = 'New: [' + val.title + '](/p/' + postId + ')';
     return Meteor.call('logSubmit', autoLog);
   },
-  postEdit: function (id, val) {
+  postEdit: function (id, val, doLog) {
     check(id, String);
     check(val, {
       title: String,
@@ -74,9 +74,14 @@ Meteor.methods({
     if (!val.title || !val.text || !val.topic) {
       throw new Meteor.Error(411, "Length required.");
     }
+    val["modifiedAt"] = new Date();
     Posts.update(id, {$set: val});
-    var autoLog = 'Updated: [' + val.title + '](/p/' + id + ')';
-    return Meteor.call('logSubmit', autoLog);
+    if (doLog) {
+      var autoLog = 'Updated: [' + val.title + '](/p/' + id + ')';
+      return Meteor.call('logSubmit', autoLog);
+    } else {
+      return;
+    }
   },
   postRemove: function (id) {
     check(id, String);

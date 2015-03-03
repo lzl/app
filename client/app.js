@@ -150,6 +150,12 @@ Template.topicPosts.helpers({
   }
 });
 
+Template.postWidePanel.helpers({
+  hasModifiedDate: function () {
+    return this.modifiedAt;
+  }
+});
+
 Template.anonymousCommentsPanel.helpers({
   comments: function () {
     return AnonymousComments.find({userId: "anonymousUserId"}, {sort: {createdAt: -1}});
@@ -339,7 +345,8 @@ Template.postEditForm.events({
     topic = $.trim(topic);
     var id = this._id;
     var val = {title: title, text: text, topic: topic};
-    Meteor.call('postEdit', id, val);
+    var doLog = tmpl.find('#doLog').checked;
+    Meteor.call('postEdit', id, val, doLog);
     Router.go('singlePost', {_id: id});
   },
   // [data-action=remove]
