@@ -28,11 +28,11 @@ Template.registerHelper("isRouter", function (name) {
 
 // This is an ugly hack
 Session.setDefault('logText', "");
+
 Template.logInsertForm.rendered = function () {
   this.autorun(function () {
     var logText = Session.get('logText');
     masonry();
-    console.log("Masonrified.");
   });
 };
 // Ugly hack ends
@@ -90,6 +90,7 @@ Tracker.autorun(function () {
 // Meteor.status ENDS
 
 Template.logsPanel.helpers({
+  // Old code START, for the time-filter purpose
   // logs: function () {
   //   if (Router.current().route.getName() === "dashboard") {
   //     return Logs.find({}, {sort: {createdAt: -1}});
@@ -99,6 +100,7 @@ Template.logsPanel.helpers({
   //     return Logs.find({createdAt: {$gte: date}}, {sort: {createdAt: -1}});
   //   }
   // },
+  // Old code END
   logs: function () {
     return Logs.find({}, {sort: {createdAt: -1}});
   },
